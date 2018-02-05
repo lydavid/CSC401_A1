@@ -2,6 +2,7 @@ import sys
 import argparse
 import os
 import json
+import html
 
 #indir = '/u/cs401/A1/data/'; # TODO: remember to change it back!
 indir = 'data/'; # changed to our pc's path to data directory
@@ -20,9 +21,12 @@ def preproc1( comment , steps=range(1,11)):
 
     modComm = ''
     if 1 in steps:
-        print('TODO')
+        comment1 = comment.strip() # remove trailing/leading whitespaces
+        modComm += comment1.replace('\n', '').replace('\r', '') # remove intermediate newlines
+
     if 2 in steps:
-        print('TODO')
+        modComm = html.unescape(modComm) # convert from html code to ascii
+
     if 3 in steps:
         print('TODO')
     if 4 in steps:
@@ -52,16 +56,13 @@ def main( args ):
 
             data = json.load(open(fullFile)) # 
 
-            
-
-
+            # TODO: select appropriate args.max lines
             preprocessed = 0 # tracks number of lines processed
             looped = False # flag to indicate that we are circling around
 
             while preprocessed < args.max:
 
-                # TODO: select appropriate args.max lines
-
+                # allow for circular indexing
                 if looped:
                     ind = 0
                 else:
@@ -94,11 +95,26 @@ def main( args ):
 
                 looped = True
 
-            print(len(allOutput)) # confirm that the dict is the right size
+            print(len(allOutput)) # confirm that the dict is the right size, REMOVE THIS BEFORE SUBMISSION
 
     fout = open(args.output, 'w')
     fout.write(json.dumps(allOutput))
     fout.close()
+
+# REMOVE THIS BEFORE SUBMISSION
+def debug():
+    test_bodies = [
+        "&#36;Hello\n", 
+        "\nWorld&gt;", 
+        "In&#37 \n Between",
+        "R\r",
+        "NR\n\r",
+    ]
+
+    for i in range(len(test_bodies)):
+        print(preproc1(test_bodies[i]))
+    print("Done")
+
 
 if __name__ == "__main__":
 
@@ -113,4 +129,5 @@ if __name__ == "__main__":
         print("Error: If you want to read more than 200,272 comments per file, you have to read them all.")
         sys.exit(1)
         
-    main(args)
+    debug() # REMOVE THIS BEFORE SUBMISSION
+    #main(args)
