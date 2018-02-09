@@ -3,6 +3,7 @@ import argparse
 import os
 import json
 import html
+import re
 
 #indir = '/u/cs401/A1/data/'; # TODO: remember to change it back!
 indir = 'data/'; # changed to our pc's path to data directory
@@ -22,13 +23,19 @@ def preproc1( comment , steps=range(1,11)):
     modComm = ''
     if 1 in steps:
         comment1 = comment.strip() # remove trailing/leading whitespaces
-        modComm += comment1.replace('\n', '').replace('\r', '') # remove intermediate newlines
+        modComm += comment1.replace('\n', ' ').replace('\r', ' ') # remove intermediate newlines 
+        # -> should replace them with space or else text after them may be merged with an url and deleted in step 3
 
     if 2 in steps:
         modComm = html.unescape(modComm) # convert from html code to ascii
 
     if 3 in steps:
-        print('TODO')
+        # mainly based off of: https://stackoverflow.com/questions/3809401/what-is-a-good-regular-expression-to-match-a-url
+        # matches any number of alphanumerical and most common special characters after http or www, up until the 
+        # first occurence of character not inside that square bracket
+        # extended to allow for matching www on its own
+        modComm = re.sub(r'((https?:\/\/(www\.)?)|www)[-a-zA-Z0-9@:%._\+~#=//?]*', '', comment)
+
     if 4 in steps:
         print('TODO')
     if 5 in steps:
@@ -109,6 +116,10 @@ def debug():
         "In&#37 \n Between",
         "R\r",
         "NR\n\r",
+        "I use https://regex101.com/ to check my regex.",
+        "www.google.ca",
+        "https://www.reddit.com/",
+        "http://www.reddit.com/"
     ]
 
     for i in range(len(test_bodies)):
