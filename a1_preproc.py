@@ -34,10 +34,16 @@ def preproc1( comment , steps=range(1,11)):
         # matches any number of non-whitespace characters after http or www
         # extended to allow for matching www on its own and to cover potentially more special characters
         # we are assuming there are no spaces in a URL
-        modComm = re.sub(r'((https?:\/\/(www\.)?)|www)\S*', '', comment)
+        modComm = re.sub(r'((https?:\/\/(www\.)?)|www)\S*', '', modComm)
 
     if 4 in steps:
+        #
+        # split on whitespace, for each token, if there's a punctuation in it, split it at first punctuation (thus multiple punctuations side by side becomes one token)
+        # remerge string with space between each token
+        #tokens = comment.split(" ")
         print('TODO')
+
+        #print(tokens)
     if 5 in steps:
         print('TODO')
     if 6 in steps:
@@ -49,7 +55,8 @@ def preproc1( comment , steps=range(1,11)):
     if 9 in steps:
         print('TODO')
     if 10 in steps:
-        print('TODO')
+        # convert to lowercase
+        modComm = modComm.lower()
         
     return modComm
 
@@ -120,7 +127,10 @@ def debug():
         "www.google.ca",
         "https://www.reddit.com/",
         "http://www.reddit.com/",
-        "Tut: https://drive.google.com/file/d/1_1C2_yp_OtBK4jCbjsrFd4RQ-_ZfVScm/view"
+        "Tut: https://drive.google.com/file/d/1_1C2_yp_OtBK4jCbjsrFd4RQ-_ZfVScm/view",
+        "Use www.fb.com.", # last . is not part of url
+        "http://www.foxnews.com/us/2015/03/03/lapd-chief-says-homeless-man-shot-by-police-reached-for-officer-gun/ according to this story 2 of the cops involved in the shooting were wearing body cameras and the gun that was recovered which was allegedly taken from one of the officers by the homeless man was partially cocked and jammed with a round of ammo in the injection port which is indicative of a struggle over the weapon. unfortunately people won't wait to see the evidence and a lot of the people who do see the evidence will ignore it or say that it was planted/made up so this is \"just another unarmed black man killed by the police for minding his own business.\""
+
     ]
 
     for i in range(len(test_bodies)):
@@ -134,7 +144,7 @@ if __name__ == "__main__":
     parser.add_argument('ID', metavar='N', type=int, nargs=1,
                         help='your student ID')
     parser.add_argument("-o", "--output", help="Directs the output to a filename of your choice", required=True)
-    parser.add_argument("--max", help="The maximum number of comments to read from each file", default=10000) # add "type=int" if we get error for args.max
+    parser.add_argument("--max", help="The maximum number of comments to read from each file", default=10000, type=int) # add "type=int" if we get error for args.max
     args = parser.parse_args()
 
     if (args.max > 200272):
@@ -142,4 +152,4 @@ if __name__ == "__main__":
         sys.exit(1)
         
     debug() # REMOVE THIS BEFORE SUBMISSION
-    #main(args)
+    main(args)
