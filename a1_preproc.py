@@ -31,10 +31,10 @@ def preproc1( comment , steps=range(1,11)):
 
     if 3 in steps:
         # mainly based off of: https://stackoverflow.com/questions/3809401/what-is-a-good-regular-expression-to-match-a-url
-        # matches any number of alphanumerical and most common special characters after http or www, up until the 
-        # first occurence of character not inside that square bracket
-        # extended to allow for matching www on its own
-        modComm = re.sub(r'((https?:\/\/(www\.)?)|www)[-a-zA-Z0-9@:%._\+~#=//?]*', '', comment)
+        # matches any number of non-whitespace characters after http or www
+        # extended to allow for matching www on its own and to cover potentially more special characters
+        # we are assuming there are no spaces in a URL
+        modComm = re.sub(r'((https?:\/\/(www\.)?)|www)\S*', '', comment)
 
     if 4 in steps:
         print('TODO')
@@ -119,7 +119,8 @@ def debug():
         "I use https://regex101.com/ to check my regex.",
         "www.google.ca",
         "https://www.reddit.com/",
-        "http://www.reddit.com/"
+        "http://www.reddit.com/",
+        "Tut: https://drive.google.com/file/d/1_1C2_yp_OtBK4jCbjsrFd4RQ-_ZfVScm/view"
     ]
 
     for i in range(len(test_bodies)):
