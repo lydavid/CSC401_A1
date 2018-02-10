@@ -4,10 +4,15 @@ import os
 import json
 import html
 import re
+import string
 
 #indir = '/u/cs401/A1/data/'; # TODO: remember to change it back!
 indir = 'data/'; # changed to our pc's path to data directory
 
+abbrevs = []
+with open('abbrev.english') as file:
+    abbrevs = file.read().lower().splitlines()
+abbrevs.append("e.g.")
 
 def preproc1( comment , steps=range(1,11)):
     ''' This function pre-processes a single comment
@@ -37,13 +42,68 @@ def preproc1( comment , steps=range(1,11)):
         modComm = re.sub(r'((https?:\/\/(www\.)?)|www)\S*', '', modComm)
 
     if 4 in steps:
-        #
-        # split on whitespace, for each token, if there's a punctuation in it, split it at first punctuation (thus multiple punctuations side by side becomes one token)
-        # remerge string with space between each token
-        #tokens = comment.split(" ")
-        print('TODO')
 
-        #print(tokens)
+
+        # to handle cases like Mr.Bean -> Mr. Bean, we can try to find all occurences of abbrev and add a space between them if they are attached to something else
+        # looking at the abbrev file and e.g. we shouldn't run into a scenario where this goes against us (like misidentifying a token as abbrev)
+        #for abbrev in abbrevs:
+
+
+
+        # split on whitespace, for each token, if there's a punctuation in it, split it at first punctuation
+        # remerge string with space between each token
+        tokens = modComm.split(" ")
+
+        new_tokens = [] # stores new set of tokens, including the splitted punctuations
+
+        for token in tokens:
+
+            if token.lower() in abbrevs: # since e.g. not in the given list
+                new_tokens.append(token)
+            
+
+            else:
+
+                f2 = False
+                for abbrev in abbrevs:
+                    ind = token.lower().find(abbrev)
+                    if ind != -1:
+                        token = token[:ind + len(abbrev)] + " " + token[ind + len(abbrev):]
+                        print(token)
+                        new_tokens.append(token)
+                        f2 = True
+                        break
+                if not f2:
+                    
+
+                    flag = False # used to determine that we have encountered a punctuation and splitted accordingly
+                    for char in token:
+
+                        if char in string.punctuation and char != "'":
+                            splitted_tokens = token.split(char, 1)
+
+                            # if second element in list is a punct as well, then we can add this punct in front of them (group a series of punct)
+                            # note that our code will not account for erroneous punctuation like (Hello ,,how are you) -> (Hello, ,,how are you)
+                            # ie we assume punctuations do not precede another token
+                            if splitted_tokens[1] and splitted_tokens[1][0] in string.punctuation:
+                                splitted_tokens[1] = char + splitted_tokens[1]
+                            else:
+                                splitted_tokens.insert(1, char)
+                            splitted_tokens = filter(None, splitted_tokens) # remove any empty string
+                            new_tokens.extend(splitted_tokens)
+                            flag = True;
+                            break;
+
+                    # if we did not find a punctuation in token, make sure to add the token to our list
+                    if not flag:
+                        new_tokens.append(token)
+
+        # build up our new mod comment
+        modComm = ''
+        for token in new_tokens:
+            modComm += token + " "
+        modComm = modComm[:-1] # remove trailing space
+
     if 5 in steps:
         print('TODO')
     if 6 in steps:
@@ -129,7 +189,15 @@ def debug():
         "http://www.reddit.com/",
         "Tut: https://drive.google.com/file/d/1_1C2_yp_OtBK4jCbjsrFd4RQ-_ZfVScm/view",
         "Use www.fb.com.", # last . is not part of url
-        "http://www.foxnews.com/us/2015/03/03/lapd-chief-says-homeless-man-shot-by-police-reached-for-officer-gun/ according to this story 2 of the cops involved in the shooting were wearing body cameras and the gun that was recovered which was allegedly taken from one of the officers by the homeless man was partially cocked and jammed with a round of ammo in the injection port which is indicative of a struggle over the weapon. unfortunately people won't wait to see the evidence and a lot of the people who do see the evidence will ignore it or say that it was planted/made up so this is \"just another unarmed black man killed by the police for minding his own business.\""
+        "http://www.foxnews.com/us/2015/03/03/lapd-chief-says-homeless-man-shot-by-police-reached-for-officer-gun/ according to this story 2 of the cops involved in the shooting were wearing body cameras and the gun that was recovered which was allegedly taken from one of the officers by the homeless man was partially cocked and jammed with a round of ammo in the injection port which is indicative of a struggle over the weapon. unfortunately people won't wait to see the evidence and a lot of the people who do see the evidence will ignore it or say that it was planted/made up so this is \"just another unarmed black man killed by the police for minding his own business.\"",
+        "Hello, we're here.",
+        "e.g. should not be split",
+        "Hi!!!",
+        "Hi?!! Thinking/thonking",
+        "Hello ,,how are you Hello,, how are you",
+        "Mr.Bean should be Mr. Bean",
+        "Miss.Carter will be on St.John St.",
+        "non-whitespace"
 
     ]
 
@@ -152,4 +220,4 @@ if __name__ == "__main__":
         sys.exit(1)
         
     debug() # REMOVE THIS BEFORE SUBMISSION
-    main(args)
+    #main(args)
