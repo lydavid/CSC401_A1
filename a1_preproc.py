@@ -11,11 +11,13 @@ import spacy
 indir = 'data/'; # changed to our pc's path to data directory
 
 abbrevs = []
-with open('abbrev.english') as file:
+with open("abbrev.english") as file:
     abbrevs = file.read().lower().splitlines()
 abbrevs.append("e.g.")
 
 clitics = ["n't", "'m", "'ve", "'ll", "'re", "'d", "'s"] # list of clitics we will use to look for them
+
+nlp = spacy.load("en_core_web_sm", disable=["parser", "ner"])  # change en_core_web_sm to en before submission
 
 def preproc1( comment , steps=range(1,11)):
     ''' This function pre-processes a single comment
@@ -30,19 +32,19 @@ def preproc1( comment , steps=range(1,11)):
 
     modComm = ''
     if 1 in steps:
-        comment1 = comment.strip() # remove trailing/leading whitespaces
-        modComm += comment1.replace('\n', ' ').replace('\r', ' ') # remove intermediate newlines 
+        comment1 = comment.strip()  # remove trailing/leading whitespaces
+        modComm += comment1.replace("\n", " ").replace("\r", " ")  # remove intermediate newlines
         # -> should replace them with space or else text after them may be merged with an url and deleted in step 3
 
     if 2 in steps:
-        modComm = html.unescape(modComm) # convert from html code to ascii
+        modComm = html.unescape(modComm)  # convert from html code to ascii
 
     if 3 in steps:
         # mainly based off of: https://stackoverflow.com/questions/3809401/what-is-a-good-regular-expression-to-match-a-url
         # matches any number of non-whitespace characters after http or www
         # extended to allow for matching www on its own and to cover potentially more special characters
         # we are assuming there are no spaces in a URL
-        modComm = re.sub(r'((https?:\/\/(www\.)?)|www)\S*', '', modComm)
+        modComm = re.sub(r"((https?:\/\/(www\.)?)|www)\S*", "", modComm)
 
     if 4 in steps:
 
@@ -61,9 +63,8 @@ def preproc1( comment , steps=range(1,11)):
 
         for token in tokens:
 
-            if token.lower() in abbrevs: # since e.g. not in the given list
+            if token.lower() in abbrevs:  # since e.g. not in the given list
                 new_tokens.append(token)
-            
 
             else:
 
@@ -77,7 +78,6 @@ def preproc1( comment , steps=range(1,11)):
                         f2 = True
                         break
                 if not f2:
-                    
 
                     flag = False # used to determine that we have encountered a punctuation and splitted accordingly
                     for char in token:
@@ -102,7 +102,7 @@ def preproc1( comment , steps=range(1,11)):
                         new_tokens.append(token)
 
         # build up our new mod comment
-        modComm = ''
+        modComm = ""
         for token in new_tokens:
             modComm += token + " "
         modComm = modComm[:-1] # remove trailing space
@@ -134,14 +134,25 @@ def preproc1( comment , steps=range(1,11)):
         modComm = modComm[:-1]  # remove trailing space
 
     if 6 in steps:
-        print('TODO')
-        
+        utt = nlp(modComm)
+        print(utt)
+        new_tokens = []
+        for token in utt:
+            new_tokens.append("%s/%s" % (token, token.tag_))
+        print(new_tokens)
+
+        # build up our new mod comment
+        modComm = ""
+        for token in new_tokens:
+            modComm += token + " "
+        modComm = modComm[:-1]  # remove trailing space
+
     if 7 in steps:
-        print('TODO')
+        print('TODO7')
     if 8 in steps:
-        print('TODO')
+        print('TODO8')
     if 9 in steps:
-        print('TODO')
+        print('TODO9')
     if 10 in steps:
         # convert to lowercase
         modComm = modComm.lower()
@@ -229,10 +240,12 @@ def debug():
         "non-whitespace",
         "This 'was' his.",
         "can't",
-        "should've would've could've didn't",
+        "should've would've could've didn't",  # spacy seems to split should/md '/`` ve/vb
         "don't! I'll I'd I'm that's they're",
         "o'clock",
-        "dogs' dog's"
+        "dogs' dog's",
+        "couldn't I'm we've we'll they're I'd that's",
+        "wouldn't've"
 
     ]
 
