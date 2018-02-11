@@ -66,16 +66,11 @@ def preproc1( comment , steps=range(1,11)):
     if 4 in steps:
 
 
-        # to handle cases like Mr.Bean -> Mr. Bean, we can try to find all occurences of abbrev and add a space between them if they are attached to something else
-        # looking at the abbrev file and e.g. we shouldn't run into a scenario where this goes against us (like misidentifying a token as abbrev)
-        #for abbrev in abbrevs:
-
-
 
         # split on whitespace, for each token, if there's a punctuation in it, split it at first punctuation
         # remerge string with space between each token
         tokens = split_on_spaces(modComm)
-
+        #print(tokens)
         new_tokens = []  # stores new set of tokens, including the splitted punctuations
 
         for token in tokens:
@@ -85,6 +80,10 @@ def preproc1( comment , steps=range(1,11)):
 
             else:
 
+                # to handle cases like Mr.Bean -> Mr. Bean, we can try to find all occurrences of abbrev and
+                # add a space between them if they are attached to something else
+                # looking at the abbrev file and e.g. we shouldn't run into a scenario where this goes against us (like misidentifying a token as abbrev)
+                # for abbrev in abbrevs:
                 f2 = False
                 for abbrev in abbrevs:
                     ind = token.lower().find(abbrev)
@@ -119,6 +118,7 @@ def preproc1( comment , steps=range(1,11)):
 
         # build up our new mod comment
         modComm = " ".join(new_tokens)
+        #print("4.2: " + modComm)
 
     if 5 in steps:
 
@@ -341,7 +341,10 @@ def debug():
         "-I said.",
         "Ellipses...",
         "dogs' 'dude' \"cake\"",
-        "\"Humans?\" she whispered."
+        "\"Humans?\" she whispered.",
+        "I walked the  dog.",
+        "me my mine we us our ours",
+        "you your yours u ur urs"
 
     ]
 
@@ -364,4 +367,4 @@ if __name__ == "__main__":
         sys.exit(1)
         
     debug()  # REMOVE THIS BEFORE SUBMISSION
-    main(args)
+    #main(args)
