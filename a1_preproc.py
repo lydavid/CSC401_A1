@@ -78,7 +78,6 @@ def preproc1( comment , steps=range(1,11)):
                     ind = token.lower().find(abbrev)
                     if ind != -1:
                         token = token[:ind + len(abbrev)] + " " + token[ind + len(abbrev):]
-                        print(token)
                         new_tokens.append(token)
                         f2 = True
                         break
@@ -107,10 +106,7 @@ def preproc1( comment , steps=range(1,11)):
                         new_tokens.append(token)
 
         # build up our new mod comment
-        modComm = ""
-        for token in new_tokens:
-            modComm += token + " "
-        modComm = modComm[:-1] # remove trailing space
+        modComm = " ".join(new_tokens)
 
     if 5 in steps:
 
@@ -127,28 +123,23 @@ def preproc1( comment , steps=range(1,11)):
         # now deal with possessive ' like dogs', cause we don't want to add ' to our clitics list
         # else it will mess things up above
         tokens = modComm.split(" ")
-        print(tokens)
         for i in range(len(tokens)):
             if tokens[i] and tokens[i][-1] == "'":
                 tokens[i] = tokens[i][:-1] + " " + tokens[i][-1:]
 
         # build up our new mod comment
-        modComm = ''
-        for token in tokens:
-            modComm += token + " "
-        modComm = modComm[:-1]  # remove trailing space
+        modComm = " ".join(new_tokens)
 
     if 6 in steps:
-        utt = nlp(modComm)
+        doc = nlp(modComm)
         new_tokens = []
-        for token in utt:
+        for token in doc:
             new_tokens.append("%s/%s" % (token, token.tag_))
 
         # build up our new mod comment
-        modComm = ""
-        for token in new_tokens:
-            modComm += token + " "
-        modComm = modComm[:-1]  # remove trailing space
+        modComm = " ".join(new_tokens)
+        print("6: " + modComm)
+
 
     if 7 in steps:
 
@@ -165,19 +156,35 @@ def preproc1( comment , steps=range(1,11)):
                 new_tokens.append(token)
 
         # build up our new mod comment
-        modComm = ""
-        for token in new_tokens:
-            modComm += token + " "
-        modComm = modComm[:-1]  # remove trailing space
+        modComm = " ".join(new_tokens)
 
     if 8 in steps:
-        print('TODO8')
+
+        print("8.1: " + modComm)
+
+        tokens = modComm.split(" ")
+        new_tokens = []
+        for token in tokens:
+            slash_ind = token.find("/", 1)
+            token_only = token[:slash_ind]
+            tag_only = token[slash_ind:]
+            doc = nlp(token_only)
+            for t in doc:
+                if t.lemma_[0] == "-" and token[0] != "-":
+                    new_tokens.append(token)
+                else:
+                    new_tokens.append("%s%s" % (t.lemma_, tag_only))
+
+        # build up our new mod comment
+        modComm = " ".join(new_tokens)
+        print("8.2: " + modComm)
+
     if 9 in steps:
         print('TODO9')
     if 10 in steps:
         # convert to lowercase
         modComm = modComm.lower()
-        
+
     return modComm
 
 def main( args ):
@@ -267,12 +274,13 @@ def debug():
         "dogs' dog's",
         "couldn't I'm we've we'll they're I'd that's",
         "wouldn't've",
-        "You should've did it."
+        "You should've did it.",
+        "-I said."
 
     ]
 
     for i in range(len(test_bodies)):
-        print(preproc1(test_bodies[i]))
+        print(preproc1(test_bodies[i]) + "\n")
     print("Done")
 
 
