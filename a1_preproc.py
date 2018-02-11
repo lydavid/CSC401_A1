@@ -5,6 +5,7 @@ import json
 import html
 import re
 import string
+import spacy
 
 #indir = '/u/cs401/A1/data/'; # TODO: remember to change it back!
 indir = 'data/'; # changed to our pc's path to data directory
@@ -13,6 +14,8 @@ abbrevs = []
 with open('abbrev.english') as file:
     abbrevs = file.read().lower().splitlines()
 abbrevs.append("e.g.")
+
+clitics = ["n't", "'m", "'ve", "'ll", "'re", "'d", "'s"] # list of clitics we will use to look for them
 
 def preproc1( comment , steps=range(1,11)):
     ''' This function pre-processes a single comment
@@ -54,7 +57,7 @@ def preproc1( comment , steps=range(1,11)):
         # remerge string with space between each token
         tokens = modComm.split(" ")
 
-        new_tokens = [] # stores new set of tokens, including the splitted punctuations
+        new_tokens = []  # stores new set of tokens, including the splitted punctuations
 
         for token in tokens:
 
@@ -91,8 +94,8 @@ def preproc1( comment , steps=range(1,11)):
                                 splitted_tokens.insert(1, char)
                             splitted_tokens = filter(None, splitted_tokens) # remove any empty string
                             new_tokens.extend(splitted_tokens)
-                            flag = True;
-                            break;
+                            flag = True
+                            break
 
                     # if we did not find a punctuation in token, make sure to add the token to our list
                     if not flag:
@@ -105,9 +108,34 @@ def preproc1( comment , steps=range(1,11)):
         modComm = modComm[:-1] # remove trailing space
 
     if 5 in steps:
-        print('TODO')
+
+        # for each clitic, find all occurrences of it in the comment, and add a space to split it from its token
+        for clitic in clitics:
+            occurrences = modComm.count(clitic)
+            start = 0
+            while occurrences > 0:
+                ind = modComm.find(clitic, start)
+                modComm = modComm[:ind] + " " + modComm[ind:]
+                start = ind + len(clitic)  # we makre sure we're not finding the same clitic over and over
+                occurrences -= 1
+
+        # now deal with possessive ' like dogs', cause we don't want to add ' to our clitics list
+        # else it will mess things up above
+        tokens = modComm.split(" ")
+        print(tokens)
+        for i in range(len(tokens)):
+            if tokens[i] and tokens[i][-1] == "'":
+                tokens[i] = tokens[i][:-1] + " " + tokens[i][-1:]
+
+        # build up our new mod comment
+        modComm = ''
+        for token in tokens:
+            modComm += token + " "
+        modComm = modComm[:-1]  # remove trailing space
+
     if 6 in steps:
         print('TODO')
+        
     if 7 in steps:
         print('TODO')
     if 8 in steps:
@@ -128,11 +156,11 @@ def main( args ):
             fullFile = os.path.join(subdir, file)
             print("Processing " + fullFile)
 
-            data = json.load(open(fullFile)) # 
+            data = json.load(open(fullFile))
 
             # TODO: select appropriate args.max lines
-            preprocessed = 0 # tracks number of lines processed
-            looped = False # flag to indicate that we are circling around
+            preprocessed = 0  # tracks number of lines processed
+            looped = False  # flag to indicate that we are circling around
 
             while preprocessed < args.max:
 
@@ -169,11 +197,12 @@ def main( args ):
 
                 looped = True
 
-            print(len(allOutput)) # confirm that the dict is the right size, REMOVE THIS BEFORE SUBMISSION
+            print(len(allOutput))  # confirm that the dict is the right size, REMOVE THIS BEFORE SUBMISSION
 
     fout = open(args.output, 'w')
     fout.write(json.dumps(allOutput))
     fout.close()
+
 
 # REMOVE THIS BEFORE SUBMISSION
 def debug():
@@ -197,7 +226,13 @@ def debug():
         "Hello ,,how are you Hello,, how are you",
         "Mr.Bean should be Mr. Bean",
         "Miss.Carter will be on St.John St.",
-        "non-whitespace"
+        "non-whitespace",
+        "This 'was' his.",
+        "can't",
+        "should've would've could've didn't",
+        "don't! I'll I'd I'm that's they're",
+        "o'clock",
+        "dogs' dog's"
 
     ]
 
