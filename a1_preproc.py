@@ -8,7 +8,7 @@ import string
 import spacy
 
 #indir = '/u/cs401/A1/data/'; # TODO: remember to change it back!
-indir = 'data/'; # changed to our pc's path to data directory
+indir = 'data/'  # changed to our pc's path to data directory
 
 abbrevs = []
 with open("abbrev.english") as file:  # change to /u/cs401/WordLists/abbrev.english
@@ -22,6 +22,9 @@ nlp = spacy.load("en_core_web_sm", disable=["parser", "ner"])  # change en_core_
 stopwords = []
 with open("StopWords") as file:  # change to /u/cs401/WordLists/StopWords
     stopwords = file.read().lower().splitlines()
+
+ending_punctuations = [".", "!", "?", ":", ";", "—"]
+temp_bound = "<boundary>"
 
 
 def preproc1( comment , steps=range(1,11)):
@@ -181,6 +184,58 @@ def preproc1( comment , steps=range(1,11)):
 
     if 9 in steps:
         print('TODO9')
+        '''
+        Place putative sentence boundaries after all occurrences of . ? ! (and
+        maybe ; : —)
+        Move the boundary after following quotation marks, if any.
+        Disqualify a period boundary in the following circumstances:
+            – If it is preceded by a known abbreviation of a sort that does not normally
+        occur word finally, but is commonly followed by a capitalized
+        proper name, such as Prof. or vs.
+            – If it is preceded by a known abbreviation and not followed by an
+        uppercase word. This will deal correctly with most usages of abbreviations
+        like etc. or Jr. which can occur sentence medially or
+        finally.
+        
+        '''
+
+        # use a symbol to indicate temp sentence boundary: <boundary>
+        # insert this after all .?!;:—
+        tokens = modComm.split(" ")
+        tokens = [t if not t.isspace() else "" for t in tokens]
+        tokens = list(filter(None, tokens))
+        new_tokens = []
+        for i in range(len(tokens)):
+            print(tokens[i])
+            if tokens[i] and tokens[i][-1] == "'":  # spacy seems to use this particular quotation as the ending quotation tag
+                # if there was a preceding <boundary>, insert this token before it
+                if i > 0 and new_tokens[-1] == temp_bound:
+                    new_tokens.insert(-1, tokens[i])
+                else:
+                    new_tokens.append(tokens[i])
+            else:
+                new_tokens.append(tokens[i])
+                if tokens[i][0] in ending_punctuations:
+                    new_tokens.append(temp_bound)
+
+
+        # if there is a quotation mark afterwards, move it after
+
+        # remove the boundary if it is preceded by abbrev commonly followed by capitalized proper name
+        # or preceded by abbrev and not followed by uppercase word
+
+        # Disqualify a boundary with a ? or ! if:
+        #    – It is followed by a lowercase letter (or a known name).
+
+
+        # Regard other putative sentence boundaries as sentence boundaries.
+        for i in range(len(new_tokens)):
+            if new_tokens[i] == temp_bound:
+                new_tokens[i] = "\n"
+
+        # build up our new mod comment
+        modComm = " ".join(new_tokens)
+
     if 10 in steps:
         # convert to lowercase
         modComm = modComm.lower()
@@ -275,7 +330,10 @@ def debug():
         "couldn't I'm we've we'll they're I'd that's",
         "wouldn't've",
         "You should've did it.",
-        "-I said."
+        "-I said.",
+        "Ellipses...",
+        "dogs' 'dude' \"cake\"",
+        "\"Humans?\" she whispered."
 
     ]
 
