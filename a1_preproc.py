@@ -284,7 +284,7 @@ def main( args ):
                     decoded_line = json.loads(line)
 
                     # TODO: choose to retain fields from those lines that are relevant to you
-                    decoded_line = {field: decoded_line[field] for field in ('subreddit', 'author', 'body', 'id')}
+                    decoded_line = {field: decoded_line[field] for field in ('body', 'id')}
 
                     # TODO: add a field to each selected line called 'cat' with the value of 'file' (e.g., 'Alt', 'Right', ...) 
                     decoded_line['cat'] = fullFile.split('/')[-1] # it should be the part after the last /
