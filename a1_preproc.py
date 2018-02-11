@@ -11,13 +11,18 @@ import spacy
 indir = 'data/'; # changed to our pc's path to data directory
 
 abbrevs = []
-with open("abbrev.english") as file:
+with open("abbrev.english") as file:  # change to /u/cs401/WordLists/abbrev.english
     abbrevs = file.read().lower().splitlines()
 abbrevs.append("e.g.")
 
 clitics = ["n't", "'m", "'ve", "'ll", "'re", "'d", "'s"] # list of clitics we will use to look for them
 
 nlp = spacy.load("en_core_web_sm", disable=["parser", "ner"])  # change en_core_web_sm to en before submission
+
+stopwords = []
+with open("StopWords") as file:  # change to /u/cs401/WordLists/StopWords
+    stopwords = file.read().lower().splitlines()
+
 
 def preproc1( comment , steps=range(1,11)):
     ''' This function pre-processes a single comment
@@ -135,11 +140,9 @@ def preproc1( comment , steps=range(1,11)):
 
     if 6 in steps:
         utt = nlp(modComm)
-        print(utt)
         new_tokens = []
         for token in utt:
             new_tokens.append("%s/%s" % (token, token.tag_))
-        print(new_tokens)
 
         # build up our new mod comment
         modComm = ""
@@ -148,7 +151,25 @@ def preproc1( comment , steps=range(1,11)):
         modComm = modComm[:-1]  # remove trailing space
 
     if 7 in steps:
-        print('TODO7')
+
+        # if one of our tokens is a stop word according to our list above, remove it along with its tag
+        tokens = modComm.split(" ")
+        new_tokens = []
+        for token in tokens:
+            # get the token part of token, ie the part before the /TAG
+            # note //SYM is a legit token, so we'll search starting from index 1
+            # for simplicity, we will assume that no one types ///SYM
+            slash_ind = token.find("/", 1)
+            token_only = token[:slash_ind]
+            if token_only not in stopwords:
+                new_tokens.append(token)
+
+        # build up our new mod comment
+        modComm = ""
+        for token in new_tokens:
+            modComm += token + " "
+        modComm = modComm[:-1]  # remove trailing space
+
     if 8 in steps:
         print('TODO8')
     if 9 in steps:
@@ -245,7 +266,8 @@ def debug():
         "o'clock",
         "dogs' dog's",
         "couldn't I'm we've we'll they're I'd that's",
-        "wouldn't've"
+        "wouldn't've",
+        "You should've did it."
 
     ]
 
