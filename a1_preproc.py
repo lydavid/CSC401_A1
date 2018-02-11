@@ -24,8 +24,17 @@ with open("StopWords") as file:  # change to /u/cs401/WordLists/StopWords
     stopwords = file.read().lower().splitlines()
 
 ending_punctuations = [".", "!", "?", ":", ";", "—"]
-temp_bound = "<boundary>"
+temp_bound = "<boundary>"  # used to mark temporary sentence ending boundary in step 9
 
+
+def split_on_spaces(text):
+    ''' Splits text on spaces, cleans up unnecessary spaces and returns the list '''
+    text = text.split(" ")
+    # make sure we don't have random spaces
+    text = [t if not t.isspace() else "" for t in text]
+    text = list(filter(None, text))
+
+    return text
 
 def preproc1( comment , steps=range(1,11)):
     ''' This function pre-processes a single comment
@@ -65,7 +74,7 @@ def preproc1( comment , steps=range(1,11)):
 
         # split on whitespace, for each token, if there's a punctuation in it, split it at first punctuation
         # remerge string with space between each token
-        tokens = modComm.split(" ")
+        tokens = split_on_spaces(modComm)
 
         new_tokens = []  # stores new set of tokens, including the splitted punctuations
 
@@ -141,13 +150,13 @@ def preproc1( comment , steps=range(1,11)):
 
         # build up our new mod comment
         modComm = " ".join(new_tokens)
-        print("6: " + modComm)
+        #print("6: " + modComm)
 
 
     if 7 in steps:
 
         # if one of our tokens is a stop word according to our list above, remove it along with its tag
-        tokens = modComm.split(" ")
+        tokens = split_on_spaces(modComm)
         new_tokens = []
         for token in tokens:
             # get the token part of token, ie the part before the /TAG
@@ -163,9 +172,9 @@ def preproc1( comment , steps=range(1,11)):
 
     if 8 in steps:
 
-        print("8.1: " + modComm)
+        #print("8.1: " + modComm)
 
-        tokens = modComm.split(" ")
+        tokens = split_on_spaces(modComm)
         new_tokens = []
         for token in tokens:
             slash_ind = token.find("/", 1)
@@ -180,10 +189,9 @@ def preproc1( comment , steps=range(1,11)):
 
         # build up our new mod comment
         modComm = " ".join(new_tokens)
-        print("8.2: " + modComm)
+        #print("8.2: " + modComm)
 
     if 9 in steps:
-        print('TODO9')
         '''
         Place putative sentence boundaries after all occurrences of . ? ! (and
         maybe ; : —)
@@ -199,14 +207,14 @@ def preproc1( comment , steps=range(1,11)):
         
         '''
 
+        #print("9.1: " + modComm)
         # use a symbol to indicate temp sentence boundary: <boundary>
         # insert this after all .?!;:—
-        tokens = modComm.split(" ")
-        tokens = [t if not t.isspace() else "" for t in tokens]
-        tokens = list(filter(None, tokens))
+
+        tokens = split_on_spaces(modComm)
+
         new_tokens = []
         for i in range(len(tokens)):
-            print(tokens[i])
             if tokens[i] and tokens[i][-1] == "'":  # spacy seems to use this particular quotation as the ending quotation tag
                 # if there was a preceding <boundary>, insert this token before it
                 if i > 0 and new_tokens[-1] == temp_bound:
@@ -217,9 +225,6 @@ def preproc1( comment , steps=range(1,11)):
                 new_tokens.append(tokens[i])
                 if tokens[i][0] in ending_punctuations:
                     new_tokens.append(temp_bound)
-
-
-        # if there is a quotation mark afterwards, move it after
 
         # remove the boundary if it is preceded by abbrev commonly followed by capitalized proper name
         # or preceded by abbrev and not followed by uppercase word
@@ -235,10 +240,13 @@ def preproc1( comment , steps=range(1,11)):
 
         # build up our new mod comment
         modComm = " ".join(new_tokens)
+        #print("9.2: " +  modComm)
+        #print(".")
 
     if 10 in steps:
         # convert to lowercase
         modComm = modComm.lower()
+
 
     return modComm
 
@@ -355,5 +363,5 @@ if __name__ == "__main__":
         print("Error: If you want to read more than 200,272 comments per file, you have to read them all.")
         sys.exit(1)
         
-    debug() # REMOVE THIS BEFORE SUBMISSION
-    #main(args)
+    debug()  # REMOVE THIS BEFORE SUBMISSION
+    main(args)
