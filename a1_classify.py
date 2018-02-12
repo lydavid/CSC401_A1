@@ -6,17 +6,31 @@ import argparse
 import sys
 import os
 
-def accuracy( C ):
+
+def accuracy(C):
     ''' Compute accuracy given Numpy array confusion matrix C. Returns a floating point value '''
-    print ('TODO')
+    accuracy = np.trace(C) / np.sum(C)
+    return accuracy
 
-def recall( C ):
+
+def recall(C):
     ''' Compute recall given Numpy array confusion matrix C. Returns a list of floating point values '''
-    print ('TODO')
+    recall_list = []
+    num_points = C.shape[0]
+    for k in range(num_points):
+        recall_list.append(C[k, k] / np.sum(C[k, :]))
 
-def precision( C ):
+    return recall_list
+
+
+def precision(C):
     ''' Compute precision given Numpy array confusion matrix C. Returns a list of floating point values '''
-    print ('TODO')
+    precision_list = []
+    num_points = C.shape[0]
+    for k in range(num_points):
+        precision_list.append(C[k, k] / np.sum(C[:, k]))
+
+    return precision_list
     
 
 def class31(filename):
@@ -77,9 +91,19 @@ def class34( filename, i ):
        i: int, the index of the supposed best classifier (from task 3.1)  
         '''
     print('TODO Section 3.4')
+
+def main(args):
+    print('TODO')
+    bleh = np.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]])
+    print(accuracy(bleh))
+    print(recall(bleh))
+    print(precision(bleh))
+
     
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description='Process each .')
     parser.add_argument("-i", "--input", help="the input npz file from Task 2", required=True)
     args = parser.parse_args()
 
     # TODO : complete each classification experiment, in sequence.
+    main(args)

@@ -180,9 +180,6 @@ def extract1(comment):
             token = token.lower()
             tag = tag.lower()
 
-            token_list.append(token)
-            tag_list.append(tag)
-
             num_characters += len(token)
             num_non_punct_only_tokens += 1 if not all([c in string.punctuation for c in token]) else 0
 
@@ -201,8 +198,10 @@ def extract1(comment):
             if tag == "vbd":
                 num_past_verbs += 1
 
-            # come back to future tense
-            if token in ["'ll", "will", "gonna"]:
+            if len(token_list) > 1 and token_list[-1] in ["'ll", "will", "gonna"] and tag == "vb":
+                num_future_verbs += 1
+
+            if len(token_list) > 2 and token_list[-2] == "going" and token_list[-1] == "to" and tag == "vb":
                 num_future_verbs += 1
 
             if tag == ",":
@@ -237,6 +236,8 @@ def extract1(comment):
                 AMeanSum_array.append(Warringer_dict[token][5])
                 DMeanSum_array.append(Warringer_dict[token][8])
 
+            token_list.append(token)
+            tag_list.append(tag)
 
     # if the last token/tag pair is not \n, add a \n pair
     if token_tags and token_tags[token_tags_len - 1] != "\n":
@@ -415,6 +416,9 @@ def main(args):
 
         # feat 174 ie integer for class
         feats[i, 173] = class_lookup[cat]
+        #print(comment)
+        #print(feats[i])
+        #print("\n")
 
     np.savez_compressed(args.output, feats)
 
