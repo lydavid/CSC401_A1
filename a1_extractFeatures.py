@@ -3,6 +3,7 @@ import sys
 import argparse
 import os
 import json
+import string
 
 # Classes
 left = 0
@@ -39,30 +40,6 @@ def extract1(comment):
     # TODO: your code here
     feat_row = np.zeros(173)
 
-    # make a set of parallel array, where each index matches a token/TAG pair from comment
-    token_tags = comment.split(" ")
-    token_tags_len = len(token_tags)
-
-    token_tag_list = np.zeros(2, token_tags_len)
-
-    # if the last token/tag pair is not \n, add a \n pair
-    if token_tags[token_tags_len - 1] != "\n":
-        token_tags_len += 1
-        token_tag_list = token_tag_list.reshape((2, token_tag_list))
-        token_tag_list[0, token_tags_len - 1] = "\n"
-        token_tag_list[1, token_tags_len - 1] = "\n"
-
-    for t in len(token_tags):
-
-        # if we happen across a \n, add \n into the tags parallel -> will be used for sentence-related features
-        if token_tags[t] == "\n":
-            token_tag_list[0, t] = "\n"
-            token_tag_list[1, t] = "\n"
-        else:
-            ind = token_tags[t].rfind("/")
-            token_tag_list[0, t] = token_tags[:ind]  # token
-            token_tag_list[1, t] = token_tags[ind:]  # tag
-
     # track 1-14
     num_first_person = 0
     num_second_person = 0
@@ -79,35 +56,110 @@ def extract1(comment):
     num_slang = 0
     num_uppercase = 0
 
+    # helpers for 15-17
+    num_sentences = 0  # will be based on the num of \n, including the \n we will add if the comment did not end on one
+    num_characters = 0  # tally up the number of characters in the
+    num_non_punct_only_tokens = 0
+
+    # make a set of parallel array, where each index matches a token/TAG pair from comment
+    token_tags = comment.split(" ")
+    token_tags_len = len(token_tags)
+
+    token_list = []
+    tag_list = []
+
+    # we can improve performance by performing all of our counting feature step in this single for loop
+    for t in token_tags:
+
+        # if we happen across a \n, add \n into the tags parallel -> will be used for sentence-related features
+        if t == "\n":
+            token_list.append("\n")
+            tag_list.append("\n")
+            num_sentences += 1
+        else:
+            # this assumes that everything else has been tagged properly and thus has a "/" separating the token and tag
+            ind = t.rfind("/")
+
+            token = token_tags[:ind]
+            tag = token_tags[ind:]
+            token_list.append(token)
+            tag_list.append(tag)
+
+            num_characters += len(token)
+            num_non_punct_only_tokens += 1 if not all([c in string.punctuation for c in token]) else 0
+
+            
+
+
+    # if the last token/tag pair is not \n, add a \n pair
+    if token_tags[token_tags_len - 1] != "\n":
+        token_list.append("\n")
+        tag_list.append("\n")
+        num_sentences += 1
+
     # track 15-17
-    avg_length_sentence = 0  # number of sentences / number of tokens -> num_sentences / (token_tags_len - num_sentences), since we include \n in that count and num_sentences counts \n
 
-    avg_len_token = 0  #
+    # since we include \n in that count and num_sentences counts \n
+    num_tokens = token_tags_len - num_sentences
+    avg_length_sentence = num_tokens / num_sentences
 
+    # make sure to exclude punctuation only tokens
+    avg_len_token = 0
+    if num_non_punct_only_tokens != 0:
+        avg_len_token = num_characters / num_non_punct_only_tokens
 
-    num_sentences = 0  # 
-
+    ### Assign features to appropriate index ###
 
     # 1. Number of first-person pronouns
+    feat_row[0] = num_first_person
 
     # 2. Number of second-person pronouns
+    feat_row[1] = num_second_person
 
     # 3. Number of third-person pronouns
+    feat_row[2] = num_third_person
 
     # 4. Number of coordinating conjunctions
+    feat_row[3] = num_cc
+
     # 5. Number of past-tense verbs
-    # 6. Number of future-tense verbs
+    feat_row[4] = num_past_verbs
+
+    # 6. Number of future-tense
+    feat_row[5] = num_future_verbs
+
     # 7. Number of commas
+    feat_row[6] = num_commas
+
     # 8. Number of multi-character punctuation tokens
+    feat_row[7] = num_multi_punct
+
     # 9. Number of common nouns
+    feat_row[8] = num_common_nouns
+
     # 10. Number of proper nouns
+    feat_row[9] = num_proper_nouns
+
     # 11. Number of adverbs
+    feat_row[10] = num_adverbs
+
     # 12. Number of wh-words
+    feat_row[11] = num_wh_words
+
     # 13. Number of slang acronyms
+    feat_row[12] = num_slang
+
     # 14. Number of words in uppercase(>= 3 letters long)
+    feat_row[13] = num_uppercase
+
     # 15. Average length of sentences, in tokens
+    feat_row[14] = avg_length_sentence
+
     # 16. Average length of tokens, excluding punctuation - only tokens, in characters
+    feat_row[15] = avg_len_token
+
     # 17. Number of sentences.
+    feat_row[16] = num_sentences
 
     ### Bristol, Gilhooly, and Logie norms ###
 
@@ -149,6 +201,7 @@ def main(args):
         # feat 174 ie integer for class
         cat = line['cat']
         feats[i, 173] = class_lookup[cat]
+        print(comment)
         print(feats[i])
 
     print(feats)
