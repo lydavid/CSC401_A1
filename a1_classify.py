@@ -1,11 +1,16 @@
 from sklearn.model_selection import train_test_split
 from sklearn.feature_selection import SelectKBest
-from sklearn.feature_selection import chi2
+from sklearn.feature_selection import f_classif  # chi2
 import numpy as np
 import argparse
 import sys
 import os
-
+from sklearn.svm import SVC
+from sklearn.metrics import confusion_matrix
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.neural_network import MLPClassifier
+from sklearn.ensemble import AdaBoostClassifier
+import csv
 
 def accuracy(C):
     ''' Compute accuracy given Numpy array confusion matrix C. Returns a floating point value '''
@@ -48,7 +53,67 @@ def class31(filename):
     '''
     print('TODO Section 3.1')
 
-    return (X_train, X_test, y_train, y_test,iBest)
+    # process the input file
+    feats = np.load(filename)
+    feats = feats[feats.files[0]]
+    #print(feats.shape)
+
+    # dict used to track our data so that we can write them all at once at the end
+    classifiers_to_data = {}
+
+    # split data into 80% for training, 20% for testing
+    y = feats[:, -1]
+    X = np.delete(feats, -1, axis=1)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, train_size=0.8)
+    '''print(X_train.shape)
+    print(X_test.shape)
+    print(y_train.shape)
+    print(y_test.shape)'''
+
+    iBest = 1
+    best_accuracy = 0
+
+    for i in range(1, 6):
+        if i == 1:
+            clf = SVC()  # 1. SVC linear kernel
+        elif i == 2:
+            clf = SVC(gamma=2)  # 2. SVC radial basis function kernel
+        elif i == 3:
+            clf = RandomForestClassifier(max_depth=5, n_estimators=10)  # 3. RandomForestClassifier
+        elif i == 4:
+            clf = MLPClassifier(alpha=0.05)  # 4. MLPClassifier
+        else:
+            clf = AdaBoostClassifier()  # 5. AdaBoostClassifier
+
+        clf.fit(X_train, y_train)
+        y_pred = clf.predict(X_test)
+        c_matrix = confusion_matrix(y_test, y_pred)
+        acc = accuracy(c_matrix)
+        rec = recall(c_matrix)
+        prec = precision(c_matrix)
+
+        if acc > best_accuracy:
+            iBest = i
+
+        arr = [i, acc]
+        arr.extend(rec)
+        arr.extend(prec)
+        for row in range(c_matrix[1,:].size):
+            arr.extend(c_matrix[row,:])
+        classifiers_to_data[i] = arr
+        print(c_matrix)
+
+    print(classifiers_to_data)
+
+    # write to a1_3.1.csv
+    with open("a1_3.1.csv", "w+", newline="") as file:
+        csv_writer = csv.writer(file)
+        for i in range(1, 6):
+            data = classifiers_to_data[i]
+            csv_writer.writerow(data)
+
+
+    return (X_train, X_test, y_train, y_test, iBest)
 
 
 def class32(X_train, X_test, y_train, y_test,iBest):
@@ -93,11 +158,8 @@ def class34( filename, i ):
     print('TODO Section 3.4')
 
 def main(args):
-    print('TODO')
-    bleh = np.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]])
-    print(accuracy(bleh))
-    print(recall(bleh))
-    print(precision(bleh))
+
+    class31(args.input)
 
     
 if __name__ == "__main__":
