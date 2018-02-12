@@ -7,6 +7,8 @@ import re
 import string
 import spacy
 
+import time  # test performance
+
 #indir = '/u/cs401/A1/data/'; # TODO: remember to change it back!
 indir = 'data/'  # changed to our pc's path to data directory
 
@@ -17,7 +19,13 @@ abbrevs.append("e.g.")
 
 clitics = ["n't", "'m", "'ve", "'ll", "'re", "'d", "'s"] # list of clitics we will use to look for them
 
+start = time.clock()
+
 nlp = spacy.load("en_core_web_sm", disable=["parser", "ner"])  # change en_core_web_sm to en before submission
+
+finish = time.clock()
+
+print("spacy time: %f" % (finish - start))
 
 stopwords = []
 with open("StopWords") as file:  # change to /u/cs401/WordLists/StopWords
@@ -65,7 +73,7 @@ def preproc1( comment , steps=range(1,11)):
 
     if 4 in steps:
 
-
+        start = time.clock()
 
         # split on whitespace, for each token, if there's a punctuation in it, split it at first punctuation
         # remerge string with space between each token
@@ -119,6 +127,10 @@ def preproc1( comment , steps=range(1,11)):
         # build up our new mod comment
         modComm = " ".join(new_tokens)
         #print("4.2: " + modComm)
+
+        finish = time.clock()
+
+        print("step 4 time: %f" % (finish - start))
 
     if 5 in steps:
 
@@ -287,11 +299,17 @@ def main( args ):
                     decoded_line = {field: decoded_line[field] for field in ('body', 'id')}
 
                     # TODO: add a field to each selected line called 'cat' with the value of 'file' (e.g., 'Alt', 'Right', ...) 
-                    decoded_line['cat'] = fullFile.split('/')[-1] # it should be the part after the last /
+                    decoded_line['cat'] = fullFile.split('/')[-1]  # it should be the part after the last /
 
                     # TODO: process the body field (j['body']) with preproc1(...) using default for `steps` argument
                     # TODO: replace the 'body' field with the processed text
+                    start = time.clock()
+
                     decoded_line['body'] = preproc1(decoded_line['body'])
+
+                    finish = time.clock()
+
+                    print("preproc1 time: %f" % (finish - start))
 
                     # TODO: append the result to 'allOutput'
                     allOutput.append(decoded_line)
@@ -367,4 +385,4 @@ if __name__ == "__main__":
         sys.exit(1)
         
     debug()  # REMOVE THIS BEFORE SUBMISSION
-    #main(args)
+    main(args)
