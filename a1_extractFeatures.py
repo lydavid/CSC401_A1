@@ -4,6 +4,7 @@ import argparse
 import os
 import json
 import string
+import csv
 
 # Classes
 left = 0
@@ -42,6 +43,22 @@ slang_list = []
 with open("Slang") as file:  # add /u/cs401/WordLists/ OR submit this file as well
     slang_person_list = file.read().lower().splitlines()
 
+# BGL norms file
+BGL_dict = {}
+with open("BristolNorms+GilhoolyLogie.csv") as file:
+    reader = csv.reader(file)
+    for row in reader:
+        key = row[1]
+        BGL_dict[key] = row
+
+# Warringer norms file
+Warringer_dict = {}
+with open("Ratings_Warriner_et_al.csv") as file:
+    reader = csv.reader(file)
+    for row in reader:
+        key = row[1]
+        Warringer_dict[key] = row
+
 def extract1(comment):
     ''' This function extracts features from a single comment
 
@@ -76,8 +93,19 @@ def extract1(comment):
     num_characters = 0  # tally up the number of characters in the
     num_non_punct_only_tokens = 0
 
+    # 18-29
+    AoA_array = []
+    IMG_array = []
+    FAM_array = []
+
+    VMeanSum_array = []
+    AMeanSum_array = []
+    DMeanSum_array = []
+
     # make a set of parallel array, where each index matches a token/TAG pair from comment
     token_tags = comment.split(" ")
+    token_tags = [t if not t.isspace() or t == "\n" else "" for t in token_tags]
+    token_tags = list(filter(None, token_tags))
     token_tags_len = len(token_tags)
 
     token_list = []
@@ -151,11 +179,20 @@ def extract1(comment):
             if token in slang_list:
                 num_slang += 1
 
-            
+            # Norms
+            if token in BGL_dict:
+                AoA_array.append(BGL_dict[token][3])
+                IMG_array.append(BGL_dict[token][4])
+                FAM_array.append(BGL_dict[token][5])
+
+            if token in Warringer_dict:
+                VMeanSum_array.append(Warringer_dict[token][2])
+                AMeanSum_array.append(Warringer_dict[token][5])
+                DMeanSum_array.append(Warringer_dict[token][8])
 
 
     # if the last token/tag pair is not \n, add a \n pair
-    if token_tags[token_tags_len - 1] != "\n":
+    if token_tags and token_tags[token_tags_len - 1] != "\n":
         token_list.append("\n")
         tag_list.append("\n")
         num_sentences += 1
@@ -164,11 +201,11 @@ def extract1(comment):
 
     # since we include \n in that count and num_sentences counts \n
     num_tokens = token_tags_len - num_sentences
-    avg_length_sentence = num_tokens / num_sentences
+    avg_length_sentence = num_tokens / num_sentences if num_sentences > 0 else 0
 
     # make sure to exclude punctuation only tokens
     avg_len_token = 0
-    if num_non_punct_only_tokens != 0:
+    if num_non_punct_only_tokens > 0:
         avg_len_token = num_characters / num_non_punct_only_tokens
 
     ### Assign features to appropriate index ###
@@ -227,20 +264,78 @@ def extract1(comment):
     ### Bristol, Gilhooly, and Logie norms ###
 
     # 18. Average of AoA(100 - 700) from Bristol, Gilhooly, and Logie norms
+    avg_AoA = 0
+    std_AoA = 0
+    AoA_np_array = np.array(AoA_array).astype(np.float)
+    if AoA_np_array.size:
+        avg_AoA = np.mean(AoA_np_array)
+        std_AoA = np.std(AoA_np_array)  # 21.
+    feat_row[17] = avg_AoA
+
     # 19. Average of IMG from Bristol, Gilhooly, and Logie norms
+    avg_IMG = 0
+    std_IMG = 0
+    IMG_np_array = np.array(IMG_array).astype(np.float)
+    if IMG_np_array.size:
+        avg_IMG = np.mean(IMG_np_array)
+        std_IMG = np.std(IMG_np_array)  # 22.
+    feat_row[18] = avg_IMG
+
     # 20. Average of FAM from Bristol, Gilhooly, and Logie norms
+    avg_FAM = 0
+    std_FAM = 0
+    FAM_np_array = np.array(FAM_array).astype(np.float)
+    if FAM_np_array.size:
+        avg_FAM = np.mean(FAM_np_array)
+        std_FAM = np.std(FAM_np_array)  # 23.
+    feat_row[19] = avg_FAM
+
     # 21. Standard deviation of AoA(100 - 700) from Bristol, Gilhooly, and Logie norms
+    feat_row[20] = std_AoA
+
     # 22. Standard deviation of IMG from Bristol, Gilhooly, and Logie norms
+    feat_row[21] = std_IMG
+
     # 23. Standard deviation of FAM from Bristol, Gilhooly, and Logie norms
+    feat_row[22] = std_FAM
 
     ### Warringer norms ###
 
     # 24. Average of V.Mean.Sum from Warringer norms
+    avg_vms = 0
+    std_vms = 0
+    vms_np_array = np.array(VMeanSum_array).astype(float)
+    if vms_np_array.size:
+        avg_vms = np.mean(vms_np_array)
+        std_vms = np.std(vms_np_array)  # 27.
+    feat_row[23] = avg_vms
+
     # 25. Average of A.Mean.Sum from Warringer norms
+    avg_ams = 0
+    std_ams = 0
+    ams_np_array = np.array(AMeanSum_array).astype(float)
+    if ams_np_array.size:
+        avg_ams = np.mean(ams_np_array)
+        std_ams = np.std(ams_np_array)  # 28.
+    feat_row[24] = avg_ams
+
     # 26. Average of D.Mean.Sum from Warringer norms
+    avg_dms = 0
+    std_dms = 0
+    dms_np_array = np.array(DMeanSum_array).astype(float)
+    if dms_np_array.size:
+        avg_dms = np.mean(dms_np_array)
+        std_dms = np.std(dms_np_array)  # 29.
+    feat_row[25] = avg_dms
+
     # 27. Standard deviation of V.Mean.Sum from Warringer norms
+    feat_row[26] = std_vms
+
     # 28. Standard deviation of A.Mean.Sum from Warringer norms
+    feat_row[27] = std_ams
+
     # 29. Standard deviation of D.Mean.Sum from Warringer norms
+    feat_row[28] = std_dms
 
     return feat_row
 
