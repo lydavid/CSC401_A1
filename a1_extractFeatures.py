@@ -13,10 +13,10 @@ right = 2
 alt = 3
 
 class_lookup = {
-    "Left" : left,
-    "Center" : center,
-    "Right" : right,
-    "Alt" : alt
+    "left" : left,
+    "center" : center,
+    "right" : right,
+    "alt" : alt
 }
 
 # Declare our word lists variables etc
@@ -58,6 +58,55 @@ with open("Ratings_Warriner_et_al.csv") as file:
     for row in reader:
         key = row[1]
         Warringer_dict[key] = row
+
+### LIWC/Receptiviti files ###
+
+# Alt IDs
+alt_ID_to_ind = {}
+with open("feats/Alt_IDs.txt") as file:  # REMEMBER TO CHANGE THIS PATH RELATIVE TO CDF LAB
+    ind = 0
+    for row in file:
+        alt_ID_to_ind[row.strip()] = ind
+        ind += 1
+
+# Center IDs
+center_ID_to_ind = {}
+with open("feats/Center_IDs.txt") as file:
+    ind = 0
+    for row in file:
+        center_ID_to_ind[row.strip()] = ind
+        ind += 1
+
+# Left IDs
+left_ID_to_ind = {}
+with open("feats/Left_IDs.txt") as file:
+    ind = 0
+    for row in file:
+        left_ID_to_ind[row.strip()] = ind
+        ind += 1
+
+# Right IDs
+right_ID_to_ind = {}
+with open("feats/Right_IDs.txt") as file:
+    ind = 0
+    for row in file:
+        right_ID_to_ind[row.strip()] = ind
+        ind += 1
+
+# Alt feats
+alt_feats = np.load("feats/Alt_feats.dat.npy")
+
+# Center feats
+center_feats = np.load("feats/Center_feats.dat.npy")
+
+# Left feats
+left_feats = np.load("feats/Left_feats.dat.npy")
+
+# Right feats
+right_feats = np.load("feats/Right_feats.dat.npy")
+
+#print(alt_feats[alt_ID_to_ind["dlkl26p"]])
+
 
 def extract1(comment):
     ''' This function extracts features from a single comment
@@ -350,14 +399,23 @@ def main(args):
     for i in range(len(data)):
         line = data[i]
         comment = line['body']
+        id = line['id'].lower()
+        cat = line['cat'].lower()
+
         # the first 29 features
         feats[i, 0:173] = extract1(comment)  # first 173, everything after 29th are still zeros
-        #print(feats[i])
 
         # feat 30-173
+        if cat == "alt":
+            feats[i, 29:173] = alt_feats[alt_ID_to_ind[id]]
+        elif cat == "center":
+            feats[i, 29:173] = center_feats[center_ID_to_ind[id]]
+        elif cat == "left":
+            feats[i, 29:173] = left_feats[left_ID_to_ind[id]]
+        elif cat == "right":
+            feats[i, 29:173] = right_feats[right_ID_to_ind[id]]
 
         # feat 174 ie integer for class
-        cat = line['cat']
         feats[i, 173] = class_lookup[cat]
         print(comment)
         print(feats[i])
@@ -375,4 +433,10 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     main(args)
+
+    # REMOVE
+    '''feats = np.load("feats.npz")
+    feat = feats[feats.files[0]]
+    for row in feat:
+        print(row)'''
 
