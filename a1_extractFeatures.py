@@ -105,8 +105,6 @@ left_feats = np.load("feats/Left_feats.dat.npy")
 # Right feats
 right_feats = np.load("feats/Right_feats.dat.npy")
 
-#print(alt_feats[alt_ID_to_ind["dlkl26p"]])
-
 
 def extract1(comment):
     ''' This function extracts features from a single comment
@@ -403,7 +401,7 @@ def main(args):
         cat = line['cat'].lower()
 
         # the first 29 features
-        feats[i, 0:173] = extract1(comment)  # first 173, everything after 29th are still zeros
+        feats[i, 0:173] = extract1(comment)
 
         # feat 30-173
         if cat == "alt":
@@ -417,10 +415,6 @@ def main(args):
 
         # feat 174 ie integer for class
         feats[i, 173] = class_lookup[cat]
-        print(comment)
-        print(feats[i])
-
-    print(feats)
 
     np.savez_compressed(args.output, feats)
 
@@ -433,10 +427,3 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     main(args)
-
-    # REMOVE
-    '''feats = np.load("feats.npz")
-    feat = feats[feats.files[0]]
-    for row in feat:
-        print(row)'''
-
