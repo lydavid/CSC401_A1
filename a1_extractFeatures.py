@@ -25,7 +25,22 @@ first_person_list = []
 with open("First-person") as file:  # add /u/cs401/WordLists/ OR submit this file as well
     first_person_list = file.read().lower().splitlines()
 
+second_person_list = []
+with open("Second-person") as file:  # add /u/cs401/WordLists/ OR submit this file as well
+    second_person_list = file.read().lower().splitlines()
 
+third_person_list = []
+with open("Third-person") as file:  # add /u/cs401/WordLists/ OR submit this file as well
+    third_person_list = file.read().lower().splitlines()
+
+common_noun_tags = ["nn", "nns"]
+proper_noun_tags = ["nnp", "nnps"]
+adverb_tags = ["rb", "rbr", "rbs"]
+wh_word_tags = ["wdt", "wp", "wp$", "wrb"]
+
+slang_list = []
+with open("Slang") as file:  # add /u/cs401/WordLists/ OR submit this file as well
+    slang_person_list = file.read().lower().splitlines()
 
 def extract1(comment):
     ''' This function extracts features from a single comment
@@ -80,13 +95,61 @@ def extract1(comment):
             # this assumes that everything else has been tagged properly and thus has a "/" separating the token and tag
             ind = t.rfind("/")
 
-            token = token_tags[:ind]
-            tag = token_tags[ind:]
+            token = t[:ind]
+            tag = t[ind + 1:]
+
+            # process the uppercase sensitive features before we change the token to lowercase for everything else
+            if len(token) >= 3 and token.isupper():
+                num_uppercase += 1
+
+            token = token.lower()
+            tag = tag.lower()
+
             token_list.append(token)
             tag_list.append(tag)
 
             num_characters += len(token)
             num_non_punct_only_tokens += 1 if not all([c in string.punctuation for c in token]) else 0
+
+            if token in first_person_list:
+                num_first_person += 1
+
+            if token in second_person_list:
+                num_second_person += 1
+
+            if token in third_person_list:
+                num_third_person += 1
+
+            if tag == "cc":
+                num_cc += 1
+
+            if tag == "vbd":
+                num_past_verbs += 1
+
+            # come back to future tense
+            if token in ["'ll", "will", "gonna"]:
+                num_future_verbs += 1
+
+            if tag == ",":
+                num_commas += 1
+
+            if len(token) >= 2 and all([c in string.punctuation for c in token]):
+                num_multi_punct += 1
+
+            if tag in common_noun_tags:
+                num_common_nouns += 1
+
+            if tag in proper_noun_tags:
+                num_proper_nouns += 1
+
+            if tag in adverb_tags:
+                num_adverbs += 1
+
+            if tag in wh_word_tags:
+                num_wh_words += 1
+
+            if token in slang_list:
+                num_slang += 1
 
             
 
