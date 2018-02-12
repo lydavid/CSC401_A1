@@ -19,8 +19,14 @@ class_lookup = {
 
 # Declare our word lists variables etc
 
+# Load first-person list
+first_person_list = []
+with open("First-person") as file:  # add /u/cs401/WordLists/ OR submit this file as well
+    first_person_list = file.read().lower().splitlines()
 
-def extract1( comment ):
+
+
+def extract1(comment):
     ''' This function extracts features from a single comment
 
     Parameters:
@@ -33,11 +39,61 @@ def extract1( comment ):
     # TODO: your code here
     feat_row = np.zeros(173)
 
+    # make a set of parallel array, where each index matches a token/TAG pair from comment
+    token_tags = comment.split(" ")
+    token_tags_len = len(token_tags)
+
+    token_tag_list = np.zeros(2, token_tags_len)
+
+    # if the last token/tag pair is not \n, add a \n pair
+    if token_tags[token_tags_len - 1] != "\n":
+        token_tags_len += 1
+        token_tag_list = token_tag_list.reshape((2, token_tag_list))
+        token_tag_list[0, token_tags_len - 1] = "\n"
+        token_tag_list[1, token_tags_len - 1] = "\n"
+
+    for t in len(token_tags):
+
+        # if we happen across a \n, add \n into the tags parallel -> will be used for sentence-related features
+        if token_tags[t] == "\n":
+            token_tag_list[0, t] = "\n"
+            token_tag_list[1, t] = "\n"
+        else:
+            ind = token_tags[t].rfind("/")
+            token_tag_list[0, t] = token_tags[:ind]  # token
+            token_tag_list[1, t] = token_tags[ind:]  # tag
+
+    # track 1-14
+    num_first_person = 0
+    num_second_person = 0
+    num_third_person = 0
+    num_cc = 0
+    num_past_verbs = 0
+    num_future_verbs = 0
+    num_commas = 0
+    num_multi_punct = 0
+    num_common_nouns = 0
+    num_proper_nouns = 0
+    num_adverbs = 0
+    num_wh_words = 0
+    num_slang = 0
+    num_uppercase = 0
+
+    # track 15-17
+    avg_length_sentence = 0  # number of sentences / number of tokens -> num_sentences / (token_tags_len - num_sentences), since we include \n in that count and num_sentences counts \n
+
+    avg_len_token = 0  #
+
+
+    num_sentences = 0  # 
+
+
     # 1. Number of first-person pronouns
 
     # 2. Number of second-person pronouns
 
     # 3. Number of third-person pronouns
+
     # 4. Number of coordinating conjunctions
     # 5. Number of past-tense verbs
     # 6. Number of future-tense verbs
@@ -78,7 +134,6 @@ def main(args):
 
     data = json.load(open(args.input))
     feats = np.zeros((len(data), 173+1))
-    print(data)
 
     # TODO: your code here
 

@@ -13,7 +13,7 @@ import time  # test performance
 indir = 'data/'  # changed to our pc's path to data directory
 
 abbrevs = []
-with open("abbrev.english") as file:  # change to /u/cs401/WordLists/abbrev.english
+with open("abbrev.english") as file:  # change to /u/cs401/WordLists/abbrev.english OR submit this file as well
     abbrevs = file.read().lower().splitlines()
 abbrevs.append("e.g.")
 
@@ -174,7 +174,7 @@ def preproc1( comment , steps=range(1,11)):
             # get the token part of token, ie the part before the /TAG
             # note //SYM is a legit token, so we'll search starting from index 1
             # for simplicity, we will assume that no one types ///SYM
-            slash_ind = token.find("/", 1)
+            slash_ind = token.rfind("/")
             token_only = token[:slash_ind]
             if token_only not in stopwords:
                 new_tokens.append(token)
@@ -362,7 +362,8 @@ def debug():
         "\"Humans?\" she whispered.",
         "I walked the  dog.",
         "me my mine we us our ours",
-        "you your yours u ur urs"
+        "you your yours u ur urs",
+        "heh // ///"
 
     ]
 
@@ -385,4 +386,4 @@ if __name__ == "__main__":
         sys.exit(1)
         
     debug()  # REMOVE THIS BEFORE SUBMISSION
-    main(args)
+    #main(args)
