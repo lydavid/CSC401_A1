@@ -73,7 +73,7 @@ def preproc1( comment , steps=range(1,11)):
 
     if 4 in steps:
 
-        start = time.clock()
+        #start = time.clock()
 
         # split on whitespace, for each token, if there's a punctuation in it, split it at first punctuation
         # remerge string with space between each token
@@ -128,9 +128,9 @@ def preproc1( comment , steps=range(1,11)):
         modComm = " ".join(new_tokens)
         #print("4.2: " + modComm)
 
-        finish = time.clock()
+        #finish = time.clock()
 
-        print("step 4 time: %f" % (finish - start))
+        #print("step 4 time: %f" % (finish - start))
 
     if 5 in steps:
 
@@ -268,7 +268,7 @@ def main( args ):
     for subdir, dirs, files in os.walk(indir):
         for file in files:
             fullFile = os.path.join(subdir, file)
-            print("Processing " + fullFile)
+            print("Processing " + fullFile, flush=True)
 
             data = json.load(open(fullFile))
 
@@ -303,13 +303,13 @@ def main( args ):
 
                     # TODO: process the body field (j['body']) with preproc1(...) using default for `steps` argument
                     # TODO: replace the 'body' field with the processed text
-                    start = time.clock()
+                    #start = time.clock()
 
                     decoded_line['body'] = preproc1(decoded_line['body'])
 
-                    finish = time.clock()
+                    #finish = time.clock()
 
-                    print("preproc1 time: %f" % (finish - start))
+                    #print("preproc1 time: %f" % (finish - start))
 
                     # TODO: append the result to 'allOutput'
                     allOutput.append(decoded_line)
@@ -385,5 +385,5 @@ if __name__ == "__main__":
         print("Error: If you want to read more than 200,272 comments per file, you have to read them all.")
         sys.exit(1)
         
-    debug()  # REMOVE THIS BEFORE SUBMISSION
-    #main(args)
+    #debug()  # REMOVE THIS BEFORE SUBMISSION
+    main(args)

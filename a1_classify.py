@@ -56,7 +56,6 @@ def class31(filename):
     # process the input file
     feats = np.load(filename)
     feats = feats[feats.files[0]]
-    #print(feats.shape)
 
     # dict used to track our data so that we can write them all at once at the end
     classifiers_to_data = {}
