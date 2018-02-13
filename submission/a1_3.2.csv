@@ -1,2 +1,2 @@
 0.395625,0.440375,0.45975,0.46425,0.4675
-There does not seem to be an expected trend of accuracy increase with training sampling size increase. This could possibly be because the features we are testing on are not enough of an indicator as to what category a comment belongs to. So even if the training size increases, we do not necessarily get more relevant knowledge to progress closer towards the truth.
+There does appear to be an expected trend of accuracy increase with training sampling size increase. This could possibly be because by have more samples to train on, the classifier becomes more experienced with this type of data and can then more accurately achieve what we want it to.
