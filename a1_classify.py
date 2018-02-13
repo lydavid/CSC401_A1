@@ -70,6 +70,7 @@ def class31(filename):
     iBest = 1
     best_accuracy = 0
 
+    '''
     for i in range(1, 6):
         if i == 1:
             clf = LinearSVC()  # 1. SVC linear kernel
@@ -108,7 +109,7 @@ def class31(filename):
         for i in range(1, 6):
             data = classifiers_to_data[i]
             csv_writer.writerow(data)
-
+    '''
 
     return (X_train, X_test, y_train, y_test, iBest)
 
@@ -155,6 +156,7 @@ def class32(X_train, X_test, y_train, y_test, iBest):
             X_1k = new_X_train
             y_1k = new_y_train
 
+        '''
         clf.fit(new_X_train, new_y_train)
         y_pred = clf.predict(X_test)
         c_matrix = confusion_matrix(y_test, y_pred)
@@ -170,6 +172,7 @@ def class32(X_train, X_test, y_train, y_test, iBest):
             "indicator as to what category a comment belongs to. So even if the training size increases, we do " \
             "not necessarily get more relevant knowledge to progress closer towards the truth."
         print(comment, file=file)
+    '''
 
     return (X_1k, y_1k)
 
@@ -187,6 +190,38 @@ def class33(X_train, X_test, y_train, y_test, i, X_1k, y_1k):
        y_1k: numPy array, just 1K rows of y_train (from task 3.2)
     '''
     print('TODO Section 3.3')
+
+    k_vals = [5, 10, 20, 30, 40, 50]
+    #k5_32k_inds = []  # stores indices of the best 5 features for 32k set
+    #k5_1k_inds = []  # " " for 1k set
+
+    k5_X_new = []
+    k5_X_1k_new = []
+
+    with open("a1_3.3.csv", "w+", newline="") as file:
+        csv_writer = csv.writer(file)
+
+        for k_val in k_vals:
+            selector = SelectKBest(f_classif, k=k_val)
+            X_new = selector.fit_transform(X_train, y_train)
+            pp = selector.pvalues_
+
+            csv_writer.writerow(np.append(np.array([k_val]), pp))  # writes the num of feats and associated p-values
+
+            selector1k = SelectKBest(f_classif, k=k_val)
+            X_1k_new = selector1k.fit_transform(X_1k, y_1k)
+
+            if k_val == 5:
+                #k5_32k_inds.extend(selector.get_support(indices=True).tolist())
+                #k5_1k_inds.extend(selector1k.get_support(indices=True).tolist())
+                k5_X_new = X_new
+                k5_X_1k_new = X_1k_new
+
+    print(k5_X_new)
+    print(k5_X_1k_new)
+
+
+
 
 
 def class34( filename, i ):
