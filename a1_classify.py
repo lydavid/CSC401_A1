@@ -14,6 +14,7 @@ from sklearn.svm import LinearSVC
 import csv
 import random
 from scipy import stats
+from sklearn.model_selection import KFold
 
 
 def accuracy(C):
@@ -255,7 +256,7 @@ def class33(X_train, X_test, y_train, y_test, i, X_1k, y_1k):
         csv_writer.writerow([acc, acc1])
 
         # Answer questions on lines 8-10
-        a = "num pronouns, liwc_auxverb, liwc_feel, liwc_home and receptiviti_ambitious seems to be chosen at both" \
+        a = "num pronouns, liwc_auxverb, liwc_feel, liwc_home and receptiviti_ambitious seems to be chosen at both " \
             "low and higher amounts of data input. num pronouns is most likely because since every pronoun was " \
             "removed via our stopwords list, so it's always 0. liwc_home may be because politics is personal to some " \
             "people. ambitious could be people pushing a political agenda."
@@ -282,6 +283,49 @@ def class34( filename, i ):
     feats = np.load(filename)
     feats = feats[feats.files[0]]
 
+    accs_2D = []
+
+    with open("a1_3.4.csv", "w+", newline="") as file:
+        csv_writer = csv.writer(file)
+
+        for i in range(1, 6):
+            clf = get_classifier(i)
+
+            y = feats[:, -1]
+            X = np.delete(feats, -1, axis=1)
+            kf = KFold(n_splits=5, shuffle=True)
+
+            accs = []
+
+            for train_index, test_index in kf.split(X):
+                print("TRAIN:", train_index, "TEST:", test_index, flush=True)
+                X_train, X_test = X[train_index], X[test_index]
+                y_train, y_test = y[train_index], y[test_index]
+
+                clf.fit(X_train, y_train)
+                y_pred = clf.predict(X_test)
+                c_matrix = confusion_matrix(y_test, y_pred)
+                acc = accuracy(c_matrix)
+                accs.append(acc)
+
+            accs_2D.append(accs)
+            csv_writer.writerow(accs)
+
+        p_vals = []
+
+        i_accs = np.array(accs_2D[i - 1], dtype=float)
+        for k in range(len(accs_2D)):
+            if k != i - 1:
+                b_accs = np.array(accs_2D[k], dtype=float)
+                p_vals.append(stats.ttest_rel(i_accs, b_accs))
+
+        csv_writer.writerow(p_vals)
+        print(p_vals)
+
+        # Report significance
+        comment = "" \
+                  ""
+        print(comment, file=file)
 
 
 def main(args):
@@ -290,7 +334,6 @@ def main(args):
     c33_param = c32_param + class32(*c32_param)
     class33(*c33_param)
     i_best = c32_param[-1]
-    print(i_best)
     class34(args.input, i_best)
 
     
