@@ -200,16 +200,13 @@ def class33(X_train, X_test, y_train, y_test, i, X_1k, y_1k):
        X_1k: numPy array, just 1K rows of X_train (from task 3.2)
        y_1k: numPy array, just 1K rows of y_train (from task 3.2)
     '''
-    print('TODO Section 3.3')
 
     k_vals = [5, 10, 20, 30, 40, 50]
     k5_32k_inds = []  # stores indices of the best 5 features for 32k set
     k5_1k_inds = []  # " " for 1k set
 
     k5_X_new = []
-    y_new = []
     k5_X_1k_new = []
-    y_1k_new = []
 
     with open("a1_3.3.csv", "w+", newline="") as file:
         csv_writer = csv.writer(file)
@@ -219,20 +216,23 @@ def class33(X_train, X_test, y_train, y_test, i, X_1k, y_1k):
             X_new = selector.fit_transform(X_train, y_train)
             pp = selector.pvalues_
 
-            csv_writer.writerow(np.append(np.array([k_val]), pp))  # writes the num of feats and associated p-values
+            inds_32k = selector.get_support(indices=True)
+
+            associated_pp = [pp[inds_32k[0]]]
+            for ind in range(1, len(inds_32k)):
+                associated_pp.append(pp[inds_32k[ind]])
+            associated_pp = np.array(associated_pp, dtype=float)
+
+            csv_writer.writerow(np.append(np.array([k_val]), associated_pp))  # writes the num of feats and associated p-values
 
             selector1k = SelectKBest(f_classif, k=k_val)
             X_1k_new = selector1k.fit_transform(X_1k, y_1k)
 
             if k_val == 5:
-                k5_32k_inds.extend(selector.get_support(indices=True).tolist())
+                k5_32k_inds.extend(inds_32k.tolist())
                 k5_1k_inds.extend(selector1k.get_support(indices=True).tolist())
                 k5_X_new = X_new
                 k5_X_1k_new = X_1k_new
-
-            print(k_val)
-            print(selector.get_support(indices=True).tolist())
-            print(selector1k.get_support(indices=True).tolist())
 
         X_test_new = X_test[:,k5_32k_inds[0]]
         for i in range(1, 5):
@@ -257,12 +257,17 @@ def class33(X_train, X_test, y_train, y_test, i, X_1k, y_1k):
 
         csv_writer.writerow([acc, acc1])
 
-
-
         # Answer questions on lines 8-10
-        a = "num pronouns, liwc_auxverb, liwc_feel, liwc_home and receptiviti_ambitious"
-        b = ""
-        c = ""
+        a = "num pronouns, liwc_auxverb, liwc_feel, liwc_home and receptiviti_ambitious seems to be chosen at both" \
+            "low and higher amounts of data input. num pronouns is most likely because since every pronoun was " \
+            "removed via our stopwords list, so it's always 0. liwc_home may be because politics is personal to some " \
+            "people. ambitious could be people pushing a political agenda."
+        b = "p-values seems to be generally higher given more input data. This may be because as we receive more " \
+            "data, the significance of features goes down."
+        c = "num pronouns, liwc_home, receptiviti_assertive, receptiviti_dutiful, receptiviti_self_assured. " \
+            "people belonging to certain classes are possibly more likely to use assertive words (right-wing?), " \
+            "while others will use more dutiful words (left-wing?). certain classes are possibly more home focused " \
+            "and others extremely assured in their view, possibly those in the farther ends of the spectrum."
         print(a, file=file)
         print(b, file=file)
         print(c, file=file)
@@ -276,6 +281,7 @@ def class34( filename, i ):
        i: int, the index of the supposed best classifier (from task 3.1)  
         '''
     print('TODO Section 3.4')
+    
 
 
 def main(args):
@@ -283,6 +289,8 @@ def main(args):
     c32_param = class31(args.input)
     c33_param = c32_param + class32(*c32_param)
     class33(*c33_param)
+    i_best = c32_param[-1]
+    class34(args.input, i_best)
 
     
 if __name__ == "__main__":
