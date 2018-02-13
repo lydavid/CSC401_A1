@@ -39,7 +39,28 @@ def precision(C):
         precision_list.append(C[k, k] / np.sum(C[:, k]))
 
     return precision_list
-    
+
+
+def get_classifier(ind):
+    '''
+    Given a classifier index, return appropriate classifier.
+    :param ind: index of classifier
+    :return: returns a classifier
+    '''
+
+    if ind == 1:
+        clf = LinearSVC()  # 1. SVC linear kernel
+    elif ind == 2:
+        clf = SVC(gamma=2, max_iter=10000)  # 2. SVC radial basis function kernel
+    elif ind == 3:
+        clf = RandomForestClassifier(max_depth=5, n_estimators=10)  # 3. RandomForestClassifier
+    elif ind == 4:
+        clf = MLPClassifier(alpha=0.05)  # 4. MLPClassifier
+    else:
+        clf = AdaBoostClassifier()  # 5. AdaBoostClassifier
+
+    return clf
+
 
 def class31(filename):
     ''' This function performs experiment 3.1
@@ -129,17 +150,7 @@ def class32(X_train, X_test, y_train, y_test, iBest):
        y_1k: numPy array, just 1K rows of y_train
    '''
 
-    # since we aren't allowed to modify the parameters of these functions, we will repeat sections of the code here
-    if iBest == 1:
-        clf = LinearSVC()  # 1. SVC linear kernel
-    elif iBest == 2:
-        clf = SVC(gamma=2, max_iter=10000)  # 2. SVC radial basis function kernel
-    elif iBest == 3:
-        clf = RandomForestClassifier(max_depth=5, n_estimators=10)  # 3. RandomForestClassifier
-    elif iBest == 4:
-        clf = MLPClassifier(alpha=0.05)  # 4. MLPClassifier
-    else:
-        clf = AdaBoostClassifier()  # 5. AdaBoostClassifier
+    clf = get_classifier(iBest)
 
     # sample arbitrarily from X_train and y_train
     training_sizes = [1000, 5000, 10000, 15000, 20000]
@@ -192,11 +203,13 @@ def class33(X_train, X_test, y_train, y_test, i, X_1k, y_1k):
     print('TODO Section 3.3')
 
     k_vals = [5, 10, 20, 30, 40, 50]
-    #k5_32k_inds = []  # stores indices of the best 5 features for 32k set
-    #k5_1k_inds = []  # " " for 1k set
+    k5_32k_inds = []  # stores indices of the best 5 features for 32k set
+    k5_1k_inds = []  # " " for 1k set
 
     k5_X_new = []
+    y_new = []
     k5_X_1k_new = []
+    y_1k_new = []
 
     with open("a1_3.3.csv", "w+", newline="") as file:
         csv_writer = csv.writer(file)
@@ -212,16 +225,47 @@ def class33(X_train, X_test, y_train, y_test, i, X_1k, y_1k):
             X_1k_new = selector1k.fit_transform(X_1k, y_1k)
 
             if k_val == 5:
-                #k5_32k_inds.extend(selector.get_support(indices=True).tolist())
-                #k5_1k_inds.extend(selector1k.get_support(indices=True).tolist())
+                k5_32k_inds.extend(selector.get_support(indices=True).tolist())
+                k5_1k_inds.extend(selector1k.get_support(indices=True).tolist())
                 k5_X_new = X_new
                 k5_X_1k_new = X_1k_new
 
-    print(k5_X_new)
-    print(k5_X_1k_new)
+            print(k_val)
+            print(selector.get_support(indices=True).tolist())
+            print(selector1k.get_support(indices=True).tolist())
+
+        X_test_new = X_test[:,k5_32k_inds[0]]
+        for i in range(1, 5):
+            X_test_new = np.column_stack((X_test_new, X_test[:,k5_32k_inds[i]]))
+
+        # Train classifier i on on best k=5 features for 32k and 1k set
+        clf = get_classifier(i)
+        clf.fit(k5_X_new, y_train)
+        y_pred = clf.predict(X_test_new)
+        c_matrix = confusion_matrix(y_test, y_pred)
+        acc = accuracy(c_matrix)
+
+        X_test_new = X_test[:, k5_1k_inds[0]]
+        for i in range(1, 5):
+            X_test_new = np.column_stack((X_test_new, X_test[:, k5_1k_inds[i]]))
+
+        clf1 = get_classifier(i)
+        clf1.fit(k5_X_1k_new, y_1k)
+        y_pred = clf.predict(X_test_new)
+        c_matrix = confusion_matrix(y_test, y_pred)
+        acc1 = accuracy(c_matrix)
+
+        csv_writer.writerow([acc, acc1])
 
 
 
+        # Answer questions on lines 8-10
+        a = "num pronouns, liwc_auxverb, liwc_feel, liwc_home and receptiviti_ambitious"
+        b = ""
+        c = ""
+        print(a, file=file)
+        print(b, file=file)
+        print(c, file=file)
 
 
 def class34( filename, i ):
