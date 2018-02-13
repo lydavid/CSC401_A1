@@ -1,2 +1,2 @@
-0.376,0.429125,0.389625,0.345,0.395375
-There does not seem to be an expected trend of accuracy increase with training sampling size  increase. This could possibly be because the features we are testing on are not enough of an indicator as to what category a comment belongs to. So even if the training size increases, we do not necessarily get closer to the truth.
+0.3595,0.437,0.449625,0.447625,0.4565
+There does not seem to be an expected trend of accuracy increase with training sampling size increase. This could possibly be because the features we are testing on are not enough of an indicator as to what category a comment belongs to. So even if the training size increases, we do not necessarily get more relevant knowledge to progress closer towards the truth.
