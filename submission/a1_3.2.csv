@@ -1,2 +1,2 @@
-0.395625,0.440375,0.45975,0.46425,0.4675
+0.390125,0.44075,0.4475,0.45825,0.4625
 There does appear to be an expected trend of accuracy increase with training sampling size increase. This could possibly be because by have more samples to train on, the classifier becomes more experienced with this type of data and can then more accurately achieve what we want it to.
