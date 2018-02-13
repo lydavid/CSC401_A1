@@ -13,6 +13,7 @@ from sklearn.ensemble import AdaBoostClassifier
 from sklearn.svm import LinearSVC
 import csv
 import random
+from scipy import stats
 
 
 def accuracy(C):
@@ -51,7 +52,7 @@ def get_classifier(ind):
     if ind == 1:
         clf = LinearSVC()  # 1. SVC linear kernel
     elif ind == 2:
-        clf = SVC(gamma=2, max_iter=10000)  # 2. SVC radial basis function kernel
+        clf = SVC(gamma=2)  # 2. SVC radial basis function kernel
     elif ind == 3:
         clf = RandomForestClassifier(max_depth=5, n_estimators=10)  # 3. RandomForestClassifier
     elif ind == 4:
@@ -91,7 +92,6 @@ def class31(filename):
     iBest = 1
     best_accuracy = 0
 
-    '''
     for i in range(1, 6):
         if i == 1:
             clf = LinearSVC()  # 1. SVC linear kernel
@@ -130,7 +130,6 @@ def class31(filename):
         for i in range(1, 6):
             data = classifiers_to_data[i]
             csv_writer.writerow(data)
-    '''
 
     return (X_train, X_test, y_train, y_test, iBest)
 
@@ -167,7 +166,6 @@ def class32(X_train, X_test, y_train, y_test, iBest):
             X_1k = new_X_train
             y_1k = new_y_train
 
-        '''
         clf.fit(new_X_train, new_y_train)
         y_pred = clf.predict(X_test)
         c_matrix = confusion_matrix(y_test, y_pred)
@@ -183,7 +181,6 @@ def class32(X_train, X_test, y_train, y_test, iBest):
             "indicator as to what category a comment belongs to. So even if the training size increases, we do " \
             "not necessarily get more relevant knowledge to progress closer towards the truth."
         print(comment, file=file)
-    '''
 
     return (X_1k, y_1k)
 
@@ -280,8 +277,11 @@ def class34( filename, i ):
        filename : string, the name of the npz file from Task 2
        i: int, the index of the supposed best classifier (from task 3.1)  
         '''
-    print('TODO Section 3.4')
-    
+
+    # process the input file
+    feats = np.load(filename)
+    feats = feats[feats.files[0]]
+
 
 
 def main(args):
@@ -290,6 +290,7 @@ def main(args):
     c33_param = c32_param + class32(*c32_param)
     class33(*c33_param)
     i_best = c32_param[-1]
+    print(i_best)
     class34(args.input, i_best)
 
     
