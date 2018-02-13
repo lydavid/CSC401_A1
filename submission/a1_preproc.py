@@ -19,7 +19,7 @@ clitics = {"n't", "'m", "'ve", "'ll", "'re", "'d", "'s"}  # list of clitics we w
 nlp = spacy.load("en", disable=["parser", "ner"])
 
 stopwords = {}
-with open("/u/cs401/WordLists/StopWords") as file:
+with open("StopWords") as file:
     stopwords = set(file.read().lower().splitlines())
 
 ending_punctuations = {".", "!", "?", ":", ";", "—"}
