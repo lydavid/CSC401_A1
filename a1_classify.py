@@ -66,15 +66,11 @@ def class31(filename):
     y = feats[:, -1]
     X = np.delete(feats, -1, axis=1)
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, train_size=0.8)
-    '''print(X_train.shape)
-    print(X_test.shape)
-    print(y_train.shape)
-    print(y_test.shape)'''
 
     iBest = 1
     best_accuracy = 0
 
-    '''for i in range(1, 6):
+    for i in range(1, 6):
         if i == 1:
             clf = LinearSVC()  # 1. SVC linear kernel
         elif i == 2:
@@ -107,12 +103,12 @@ def class31(filename):
     print(classifiers_to_data, flush=True)
 
     # write to a1_3.1.csv
-    with open("a1_3.1.2.csv", "w+", newline="") as file:
+    with open("a1_3.1.csv", "w+", newline="") as file:
         csv_writer = csv.writer(file)
         for i in range(1, 6):
             data = classifiers_to_data[i]
             csv_writer.writerow(data)
-    '''
+
 
     return (X_train, X_test, y_train, y_test, iBest)
 
@@ -170,13 +166,14 @@ def class32(X_train, X_test, y_train, y_test, iBest):
         csv_writer = csv.writer(file)
         csv_writer.writerow(accs)
         comment = "There does not seem to be an expected trend of accuracy increase with training sampling size " \
-            " increase. This could possibly be because the features we are testing on are not enough of an " \
+            "increase. This could possibly be because the features we are testing on are not enough of an " \
             "indicator as to what category a comment belongs to. So even if the training size increases, we do " \
-            "not necessarily get closer to the truth."
+            "not necessarily get more relevant knowledge to progress closer towards the truth."
         print(comment, file=file)
 
     return (X_1k, y_1k)
-    
+
+
 def class33(X_train, X_test, y_train, y_test, i, X_1k, y_1k):
     ''' This function performs experiment 3.3
     
@@ -205,8 +202,8 @@ def class34( filename, i ):
 def main(args):
 
     c32_param = class31(args.input)
-    class32(*c32_param)
-    #c33_param = c32_param + class32(*c32_param)
+    c33_param = c32_param + class32(*c32_param)
+    class33(*c33_param)
 
     
 if __name__ == "__main__":

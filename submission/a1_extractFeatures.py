@@ -24,15 +24,15 @@ class_lookup = {
 
 # Load first-person list
 first_person_list = {}
-with open("First-person") as file:  # add /u/cs401/WordLists/ OR submit this file as well
+with open("/u/cs401/WordLists/First-person") as file:  # add  OR submit this file as well
     first_person_list = set(file.read().lower().splitlines())
 
 second_person_list = {}
-with open("Second-person") as file:  # add /u/cs401/WordLists/ OR submit this file as well
+with open("/u/cs401/WordLists/Second-person") as file:  # add /u/cs401/WordLists/ OR submit this file as well
     second_person_list = set(file.read().lower().splitlines())
 
 third_person_list = {}
-with open("Third-person") as file:  # add /u/cs401/WordLists/ OR submit this file as well
+with open("/u/cs401/WordLists/Third-person") as file:  # add /u/cs401/WordLists/ OR submit this file as well
     third_person_list = set(file.read().lower().splitlines())
 
 common_noun_tags = {"nn", "nns"}
@@ -41,12 +41,12 @@ adverb_tags = {"rb", "rbr", "rbs"}
 wh_word_tags = {"wdt", "wp", "wp$", "wrb"}
 
 slang_list = {}
-with open("Slang") as file:  # add /u/cs401/WordLists/ OR submit this file as well
+with open("/u/cs401/WordLists/Slang") as file:  # add /u/cs401/WordLists/ OR submit this file as well
     slang_person_list = set(file.read().lower().splitlines())
 
 # BGL norms file
 BGL_dict = {}
-with open("BristolNorms+GilhoolyLogie.csv") as file:
+with open("/u/cs401/WordLists/BristolNorms+GilhoolyLogie.csv") as file:
     reader = csv.reader(file)
     for row in reader:
         key = row[1]
@@ -54,7 +54,7 @@ with open("BristolNorms+GilhoolyLogie.csv") as file:
 
 # Warringer norms file
 Warringer_dict = {}
-with open("Ratings_Warriner_et_al.csv") as file:
+with open("/u/cs401/WordLists/Ratings_Warriner_et_al.csv") as file:
     reader = csv.reader(file)
     for row in reader:
         key = row[1]
@@ -64,7 +64,7 @@ with open("Ratings_Warriner_et_al.csv") as file:
 
 # Alt IDs
 alt_ID_to_ind = {}
-with open("feats/Alt_IDs.txt") as file:  # REMEMBER TO CHANGE THIS PATH RELATIVE TO CDF LAB
+with open("/u/cs401/A1/feats/Alt_IDs.txt") as file:
     ind = 0
     for row in file:
         alt_ID_to_ind[row.strip()] = ind
@@ -72,7 +72,7 @@ with open("feats/Alt_IDs.txt") as file:  # REMEMBER TO CHANGE THIS PATH RELATIVE
 
 # Center IDs
 center_ID_to_ind = {}
-with open("feats/Center_IDs.txt") as file:
+with open("/u/cs401/A1/feats/Center_IDs.txt") as file:
     ind = 0
     for row in file:
         center_ID_to_ind[row.strip()] = ind
@@ -80,7 +80,7 @@ with open("feats/Center_IDs.txt") as file:
 
 # Left IDs
 left_ID_to_ind = {}
-with open("feats/Left_IDs.txt") as file:
+with open("/u/cs401/A1/feats/Left_IDs.txt") as file:
     ind = 0
     for row in file:
         left_ID_to_ind[row.strip()] = ind
@@ -88,23 +88,23 @@ with open("feats/Left_IDs.txt") as file:
 
 # Right IDs
 right_ID_to_ind = {}
-with open("feats/Right_IDs.txt") as file:
+with open("/u/cs401/A1/feats/Right_IDs.txt") as file:
     ind = 0
     for row in file:
         right_ID_to_ind[row.strip()] = ind
         ind += 1
 
 # Alt feats
-alt_feats = np.load("feats/Alt_feats.dat.npy")
+alt_feats = np.load("/u/cs401/A1/feats/Alt_feats.dat.npy")
 
 # Center feats
-center_feats = np.load("feats/Center_feats.dat.npy")
+center_feats = np.load("/u/cs401/A1/feats/Center_feats.dat.npy")
 
 # Left feats
-left_feats = np.load("feats/Left_feats.dat.npy")
+left_feats = np.load("/u/cs401/A1/feats/Left_feats.dat.npy")
 
 # Right feats
-right_feats = np.load("feats/Right_feats.dat.npy")
+right_feats = np.load("/u/cs401/A1/feats/Right_feats.dat.npy")
 
 
 def process_norms(arr):

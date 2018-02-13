@@ -7,20 +7,19 @@ import re
 import string
 import spacy
 
-#indir = '/u/cs401/A1/data/'; # TODO: remember to change it back!
-indir = 'data/'  # changed to our pc's path to data directory
+indir = '/u/cs401/A1/data/';
 
 abbrevs = {}
-with open("abbrev.english") as file:  # change to /u/cs401/WordLists/abbrev.english OR submit this file as well
+with open("/u/cs401/WordLists/abbrev.english") as file:
     abbrevs = set(file.read().lower().splitlines())
 abbrevs.add("e.g.")
 
 clitics = {"n't", "'m", "'ve", "'ll", "'re", "'d", "'s"}  # list of clitics we will use to look for them
 
-nlp = spacy.load("en_core_web_sm", disable=["parser", "ner"])  # change en_core_web_sm to en before submission
+nlp = spacy.load("en", disable=["parser", "ner"])
 
 stopwords = {}
-with open("StopWords") as file:  # change to /u/cs401/WordLists/StopWords
+with open("/u/cs401/WordLists/StopWords") as file:
     stopwords = set(file.read().lower().splitlines())
 
 ending_punctuations = {".", "!", "?", ":", ";", "—"}
