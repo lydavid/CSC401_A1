@@ -121,9 +121,6 @@ def class31(filename):
         for row in range(c_matrix[1,:].size):
             arr.extend(c_matrix[row,:])
         classifiers_to_data[i] = arr
-        print(c_matrix, flush=True)
-    
-    print(classifiers_to_data, flush=True)
 
     # write to a1_3.1.csv
     with open("a1_3.1.csv", "w+", newline="") as file:
@@ -177,10 +174,9 @@ def class32(X_train, X_test, y_train, y_test, iBest):
     with open("a1_3.2.csv", "w+", newline="") as file:
         csv_writer = csv.writer(file)
         csv_writer.writerow(accs)
-        comment = "There does not seem to be an expected trend of accuracy increase with training sampling size " \
-            "increase. This could possibly be because the features we are testing on are not enough of an " \
-            "indicator as to what category a comment belongs to. So even if the training size increases, we do " \
-            "not necessarily get more relevant knowledge to progress closer towards the truth."
+        comment = "There does appear to be an expected trend of accuracy increase with training sampling size " \
+            "increase. This could possibly be because by have more samples to train on, the classifier becomes " \
+            "more experienced with this type of data and can then more accurately achieve what we want it to."
         print(comment, file=file)
 
     return (X_1k, y_1k)
@@ -298,7 +294,6 @@ def class34( filename, i ):
             accs = []
 
             for train_index, test_index in kf.split(X):
-                print("TRAIN:", train_index, "TEST:", test_index, flush=True)
                 X_train, X_test = X[train_index], X[test_index]
                 y_train, y_test = y[train_index], y[test_index]
 
@@ -320,7 +315,6 @@ def class34( filename, i ):
                 p_vals.append(stats.ttest_rel(i_accs, b_accs))
 
         csv_writer.writerow(p_vals)
-        print(p_vals)
 
         # Report significance
         comment = "" \
