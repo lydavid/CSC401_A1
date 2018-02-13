@@ -10,7 +10,7 @@ import spacy
 indir = '/u/cs401/A1/data/';
 
 abbrevs = {}
-with open("/u/cs401/WordLists/abbrev.english") as file:
+with open("abbrev.english") as file:  # submit the local file as well
     abbrevs = set(file.read().lower().splitlines())
 abbrevs.add("e.g.")
 
