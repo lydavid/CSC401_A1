@@ -10,7 +10,9 @@ from sklearn.metrics import confusion_matrix
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.neural_network import MLPClassifier
 from sklearn.ensemble import AdaBoostClassifier
+from sklearn.svm import LinearSVC
 import csv
+
 
 def accuracy(C):
     ''' Compute accuracy given Numpy array confusion matrix C. Returns a floating point value '''
@@ -51,7 +53,6 @@ def class31(filename):
        y_test: NumPy array, with the selected testing classes
        i: int, the index of the supposed best classifier
     '''
-    print('TODO Section 3.1')
 
     # process the input file
     feats = np.load(filename)
@@ -74,7 +75,7 @@ def class31(filename):
 
     for i in range(1, 6):
         if i == 1:
-            clf = SVC()  # 1. SVC linear kernel
+            clf = LinearSVC()  # 1. SVC linear kernel
         elif i == 2:
             clf = SVC(gamma=2)  # 2. SVC radial basis function kernel
         elif i == 3:
@@ -100,9 +101,9 @@ def class31(filename):
         for row in range(c_matrix[1,:].size):
             arr.extend(c_matrix[row,:])
         classifiers_to_data[i] = arr
-        print(c_matrix)
+        print(c_matrix, flush=True)
 
-    print(classifiers_to_data)
+    print(classifiers_to_data, flush=True)
 
     # write to a1_3.1.csv
     with open("a1_3.1.csv", "w+", newline="") as file:
@@ -115,7 +116,7 @@ def class31(filename):
     return (X_train, X_test, y_train, y_test, iBest)
 
 
-def class32(X_train, X_test, y_train, y_test,iBest):
+def class32(X_train, X_test, y_train, y_test, iBest):
     ''' This function performs experiment 3.2
     
     Parameters:
@@ -158,7 +159,8 @@ def class34( filename, i ):
 
 def main(args):
 
-    class31(args.input)
+    c32_param = class31(args.input)
+    c33_param = c32_param + class32(*c32_param)
 
     
 if __name__ == "__main__":

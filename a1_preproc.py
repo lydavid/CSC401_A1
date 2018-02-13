@@ -12,26 +12,20 @@ import time  # test performance
 #indir = '/u/cs401/A1/data/'; # TODO: remember to change it back!
 indir = 'data/'  # changed to our pc's path to data directory
 
-abbrevs = []
+abbrevs = {}
 with open("abbrev.english") as file:  # change to /u/cs401/WordLists/abbrev.english OR submit this file as well
-    abbrevs = file.read().lower().splitlines()
-abbrevs.append("e.g.")
+    abbrevs = set(file.read().lower().splitlines())
+abbrevs.add("e.g.")
 
-clitics = ["n't", "'m", "'ve", "'ll", "'re", "'d", "'s"] # list of clitics we will use to look for them
-
-start = time.clock()
+clitics = {"n't", "'m", "'ve", "'ll", "'re", "'d", "'s"}  # list of clitics we will use to look for them
 
 nlp = spacy.load("en_core_web_sm", disable=["parser", "ner"])  # change en_core_web_sm to en before submission
 
-finish = time.clock()
-
-print("spacy time: %f" % (finish - start))
-
-stopwords = []
+stopwords = {}
 with open("StopWords") as file:  # change to /u/cs401/WordLists/StopWords
-    stopwords = file.read().lower().splitlines()
+    stopwords = set(file.read().lower().splitlines())
 
-ending_punctuations = [".", "!", "?", ":", ";", "—"]
+ending_punctuations = {".", "!", "?", ":", ";", "—"}
 temp_bound = "<boundary>"  # used to mark temporary sentence ending boundary in step 9
 
 
@@ -73,13 +67,11 @@ def preproc1( comment , steps=range(1,11)):
 
     if 4 in steps:
 
-        #start = time.clock()
-
         # split on whitespace, for each token, if there's a punctuation in it, split it at first punctuation
         # remerge string with space between each token
         tokens = split_on_spaces(modComm)
         #print(tokens)
-        new_tokens = []  # stores new set of tokens, including the splitted punctuations
+        new_tokens = []  # stores new list of tokens, including the splitted punctuations
 
         for token in tokens:
 
@@ -92,7 +84,7 @@ def preproc1( comment , steps=range(1,11)):
                 # add a space between them if they are attached to something else
                 # looking at the abbrev file and e.g. we shouldn't run into a scenario where this goes against us (like misidentifying a token as abbrev)
                 # for abbrev in abbrevs:
-                f2 = False
+                f2 = False  # flag to indicate where token is abbrev
                 for abbrev in abbrevs:
                     ind = token.lower().find(abbrev)
                     if ind != -1:
@@ -102,7 +94,7 @@ def preproc1( comment , steps=range(1,11)):
                         break
                 if not f2:
 
-                    flag = False # used to determine that we have encountered a punctuation and splitted accordingly
+                    flag = False  # used to determine that we have encountered a punctuation and splitted accordingly
                     for char in token:
 
                         if char in string.punctuation and char != "'":
@@ -128,10 +120,6 @@ def preproc1( comment , steps=range(1,11)):
         modComm = " ".join(new_tokens)
         #print("4.2: " + modComm)
 
-        #finish = time.clock()
-
-        #print("step 4 time: %f" % (finish - start))
-
     if 5 in steps:
 
         # for each clitic, find all occurrences of it in the comment, and add a space to split it from its token
@@ -154,7 +142,9 @@ def preproc1( comment , steps=range(1,11)):
         # build up our new mod comment
         modComm = " ".join(new_tokens)
 
+
     if 6 in steps:
+
         doc = nlp(modComm)
         new_tokens = []
         for token in doc:
@@ -164,7 +154,6 @@ def preproc1( comment , steps=range(1,11)):
         modComm = " ".join(new_tokens)
         #print("6: " + modComm)
 
-
     if 7 in steps:
 
         # if one of our tokens is a stop word according to our list above, remove it along with its tag
@@ -172,8 +161,6 @@ def preproc1( comment , steps=range(1,11)):
         new_tokens = []
         for token in tokens:
             # get the token part of token, ie the part before the /TAG
-            # note //SYM is a legit token, so we'll search starting from index 1
-            # for simplicity, we will assume that no one types ///SYM
             slash_ind = token.rfind("/")
             token_only = token[:slash_ind]
             if token_only not in stopwords:
@@ -204,20 +191,6 @@ def preproc1( comment , steps=range(1,11)):
         #print("8.2: " + modComm)
 
     if 9 in steps:
-        '''
-        Place putative sentence boundaries after all occurrences of . ? ! (and
-        maybe ; : —)
-        Move the boundary after following quotation marks, if any.
-        Disqualify a period boundary in the following circumstances:
-            – If it is preceded by a known abbreviation of a sort that does not normally
-        occur word finally, but is commonly followed by a capitalized
-        proper name, such as Prof. or vs.
-            – If it is preceded by a known abbreviation and not followed by an
-        uppercase word. This will deal correctly with most usages of abbreviations
-        like etc. or Jr. which can occur sentence medially or
-        finally.
-        
-        '''
 
         #print("9.1: " + modComm)
         # use a symbol to indicate temp sentence boundary: <boundary>
@@ -244,7 +217,6 @@ def preproc1( comment , steps=range(1,11)):
         # Disqualify a boundary with a ? or ! if:
         #    – It is followed by a lowercase letter (or a known name).
 
-
         # Regard other putative sentence boundaries as sentence boundaries.
         for i in range(len(new_tokens)):
             if new_tokens[i] == temp_bound:
@@ -253,7 +225,6 @@ def preproc1( comment , steps=range(1,11)):
         # build up our new mod comment
         modComm = " ".join(new_tokens)
         #print("9.2: " +  modComm)
-        #print(".")
 
     if 10 in steps:
         # convert to lowercase
@@ -303,13 +274,13 @@ def main( args ):
 
                     # TODO: process the body field (j['body']) with preproc1(...) using default for `steps` argument
                     # TODO: replace the 'body' field with the processed text
-                    #start = time.clock()
+                    start = time.clock()
 
                     decoded_line['body'] = preproc1(decoded_line['body'])
 
-                    #finish = time.clock()
+                    finish = time.clock()
 
-                    #print("preproc1 time: %f" % (finish - start))
+                    print("preproc1 time: %f" % (finish - start))
 
                     # TODO: append the result to 'allOutput'
                     allOutput.append(decoded_line)

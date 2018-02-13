@@ -5,6 +5,7 @@ import os
 import json
 import string
 import csv
+from numbers import Number  # we will use this to ensure that our arrays are only numbers
 
 # Classes
 left = 0
@@ -19,29 +20,29 @@ class_lookup = {
     "alt" : alt
 }
 
-# Declare our word lists variables etc
+### Declare our word lists variables etc ###
 
 # Load first-person list
-first_person_list = []
+first_person_list = {}
 with open("First-person") as file:  # add /u/cs401/WordLists/ OR submit this file as well
-    first_person_list = file.read().lower().splitlines()
+    first_person_list = set(file.read().lower().splitlines())
 
-second_person_list = []
+second_person_list = {}
 with open("Second-person") as file:  # add /u/cs401/WordLists/ OR submit this file as well
-    second_person_list = file.read().lower().splitlines()
+    second_person_list = set(file.read().lower().splitlines())
 
-third_person_list = []
+third_person_list = {}
 with open("Third-person") as file:  # add /u/cs401/WordLists/ OR submit this file as well
-    third_person_list = file.read().lower().splitlines()
+    third_person_list = set(file.read().lower().splitlines())
 
-common_noun_tags = ["nn", "nns"]
-proper_noun_tags = ["nnp", "nnps"]
-adverb_tags = ["rb", "rbr", "rbs"]
-wh_word_tags = ["wdt", "wp", "wp$", "wrb"]
+common_noun_tags = {"nn", "nns"}
+proper_noun_tags = {"nnp", "nnps"}
+adverb_tags = {"rb", "rbr", "rbs"}
+wh_word_tags = {"wdt", "wp", "wp$", "wrb"}
 
-slang_list = []
+slang_list = {}
 with open("Slang") as file:  # add /u/cs401/WordLists/ OR submit this file as well
-    slang_person_list = file.read().lower().splitlines()
+    slang_person_list = set(file.read().lower().splitlines())
 
 # BGL norms file
 BGL_dict = {}
@@ -104,6 +105,23 @@ left_feats = np.load("feats/Left_feats.dat.npy")
 
 # Right feats
 right_feats = np.load("feats/Right_feats.dat.npy")
+
+
+def process_norms(arr):
+    '''
+    Process the norms together.
+    :param arr: array of numbers that we want the avg/std of
+    :return: a tuple of float: (avg, std)
+    '''
+
+    avg = 0
+    std = 0
+    arr = [e if isinstance(e, Number) else 0 for e in arr]  # replace any empty strings
+    np_arr = np.array(arr).astype(np.float)
+    if np_arr.size:
+        avg = np.mean(np_arr)
+        std = np.std(np_arr)
+    return avg, std
 
 
 def extract1(comment):
@@ -312,30 +330,15 @@ def extract1(comment):
     ### Bristol, Gilhooly, and Logie norms ###
 
     # 18. Average of AoA(100 - 700) from Bristol, Gilhooly, and Logie norms
-    avg_AoA = 0
-    std_AoA = 0
-    AoA_np_array = np.array(AoA_array).astype(np.float)
-    if AoA_np_array.size:
-        avg_AoA = np.mean(AoA_np_array)
-        std_AoA = np.std(AoA_np_array)  # 21.
+    avg_AoA, std_AoA = process_norms(AoA_array)
     feat_row[17] = avg_AoA
 
     # 19. Average of IMG from Bristol, Gilhooly, and Logie norms
-    avg_IMG = 0
-    std_IMG = 0
-    IMG_np_array = np.array(IMG_array).astype(np.float)
-    if IMG_np_array.size:
-        avg_IMG = np.mean(IMG_np_array)
-        std_IMG = np.std(IMG_np_array)  # 22.
+    avg_IMG, std_IMG = process_norms(IMG_array)
     feat_row[18] = avg_IMG
 
     # 20. Average of FAM from Bristol, Gilhooly, and Logie norms
-    avg_FAM = 0
-    std_FAM = 0
-    FAM_np_array = np.array(FAM_array).astype(np.float)
-    if FAM_np_array.size:
-        avg_FAM = np.mean(FAM_np_array)
-        std_FAM = np.std(FAM_np_array)  # 23.
+    avg_FAM, std_FAM = process_norms(FAM_array)
     feat_row[19] = avg_FAM
 
     # 21. Standard deviation of AoA(100 - 700) from Bristol, Gilhooly, and Logie norms
@@ -350,30 +353,15 @@ def extract1(comment):
     ### Warringer norms ###
 
     # 24. Average of V.Mean.Sum from Warringer norms
-    avg_vms = 0
-    std_vms = 0
-    vms_np_array = np.array(VMeanSum_array).astype(float)
-    if vms_np_array.size:
-        avg_vms = np.mean(vms_np_array)
-        std_vms = np.std(vms_np_array)  # 27.
+    avg_vms, std_vms = process_norms(VMeanSum_array)
     feat_row[23] = avg_vms
 
     # 25. Average of A.Mean.Sum from Warringer norms
-    avg_ams = 0
-    std_ams = 0
-    ams_np_array = np.array(AMeanSum_array).astype(float)
-    if ams_np_array.size:
-        avg_ams = np.mean(ams_np_array)
-        std_ams = np.std(ams_np_array)  # 28.
+    avg_ams, std_ams = process_norms(AMeanSum_array)
     feat_row[24] = avg_ams
 
     # 26. Average of D.Mean.Sum from Warringer norms
-    avg_dms = 0
-    std_dms = 0
-    dms_np_array = np.array(DMeanSum_array).astype(float)
-    if dms_np_array.size:
-        avg_dms = np.mean(dms_np_array)
-        std_dms = np.std(dms_np_array)  # 29.
+    avg_dms, std_dms = process_norms(DMeanSum_array)
     feat_row[25] = avg_dms
 
     # 27. Standard deviation of V.Mean.Sum from Warringer norms
@@ -416,7 +404,7 @@ def main(args):
 
         # feat 174 ie integer for class
         feats[i, 173] = class_lookup[cat]
-        #print(comment)
+
         #print(feats[i])
         #print("\n")
 
