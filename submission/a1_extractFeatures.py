@@ -24,15 +24,15 @@ class_lookup = {
 
 # Load first-person list
 first_person_list = {}
-with open("/u/cs401/WordLists/First-person", "r") as file:
+with open("/u/cs401/Wordlists/First-person", "r") as file:
     first_person_list = set(file.read().lower().splitlines())
 
 second_person_list = {}
-with open("/u/cs401/WordLists/Second-person", "r") as file:
+with open("/u/cs401/Wordlists/Second-person", "r") as file:
     second_person_list = set(file.read().lower().splitlines())
 
 third_person_list = {}
-with open("/u/cs401/WordLists/Third-person", "r") as file:
+with open("/u/cs401/Wordlists/Third-person", "r") as file:
     third_person_list = set(file.read().lower().splitlines())
 
 common_noun_tags = {"nn", "nns"}
@@ -41,12 +41,12 @@ adverb_tags = {"rb", "rbr", "rbs"}
 wh_word_tags = {"wdt", "wp", "wp$", "wrb"}
 
 slang_list = {}
-with open("/u/cs401/WordLists/Slang", "r") as file:  # add /u/cs401/WordLists/ OR submit this file as well
+with open("/u/cs401/Wordlists/Slang", "r") as file:  # add /u/cs401/WordLists/ OR submit this file as well
     slang_person_list = set(file.read().lower().splitlines())
 
 # BGL norms file
 BGL_dict = {}
-with open("/u/cs401/WordLists/BristolNorms+GilhoolyLogie.csv", "r") as file:
+with open("/u/cs401/Wordlists/BristolNorms+GilhoolyLogie.csv", "r") as file:
     reader = csv.reader(file)
     for row in reader:
         key = row[1]
@@ -54,7 +54,7 @@ with open("/u/cs401/WordLists/BristolNorms+GilhoolyLogie.csv", "r") as file:
 
 # Warringer norms file
 Warringer_dict = {}
-with open("/u/cs401/WordLists/Ratings_Warriner_et_al.csv", "r") as file:
+with open("/u/cs401/Wordlists/Ratings_Warriner_et_al.csv", "r") as file:
     reader = csv.reader(file)
     for row in reader:
         key = row[1]
